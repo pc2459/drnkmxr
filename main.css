@@ -1,0 +1,39 @@
+body {
+  background-color: #F1C40F;
+}
+
+a:hover {
+  color: #F1C40F;
+}
+
+.navbar {
+  margin-top: 20px;
+}
+
+.jumbotron{
+  background-color: transparent;
+}
+
+.option {
+  text-align: center;
+  margin: 40px 0;
+}
+
+
+.btn-circle{
+  display: block;
+  width: 200px;
+  height: 200px;
+  border-radius: 100px;
+  line-height: 200px;
+  background: #C0392B;
+}
+
+.btn-circle {
+  color: #ECF0F1;
+  margin: 0 auto;
+}
+
+.btn-circle:hover;{
+  color: #F1C40F;
+}
