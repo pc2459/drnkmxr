@@ -24,9 +24,22 @@ var DrnkMxr = (function(){
     };
 
 
+    /**
+     * Return string describing name and base of a drink
+     */
     Drink.prototype.toString = function(){
 
       return this.name + " (" + this.base + ")";
+    };
+
+    Drink.prototype.create = function(){
+
+      var drinkEl = $('<div>');
+      drinkEl.addClass('drink')
+              .append('<h2>' + this.name)
+              .append('<p class="instr">' + this.instructions);
+
+      return drinkEl;
     };
 
 
@@ -96,6 +109,17 @@ var DrnkMxr = (function(){
       });
     };
 
+    Cabinet.prototype.create = function(){
+
+      var drinkEls = _.map(this.drinks,function(drink){
+        return drink.create();
+      });
+
+      return drinkEls;
+
+    };
+
+
 
 
     return Cabinet;
@@ -105,21 +129,16 @@ var DrnkMxr = (function(){
 
 
 
+  /////////////////////////////////
+  // Return all the constructors //
+  /////////////////////////////////
 
-
-
-
-
-
-
-  // Return all the constructors
   var DrnkMxr = {
     Drink   : Drink,
     Cabinet : Cabinet
   };
 
   return DrnkMxr;
-
 
 })();
 
@@ -132,5 +151,28 @@ console.log(myCabinet.toString());
 
 
 $(document).on('ready', function() {
+
+  var $jumbotron = $('.jumbotron').clone();
+
+  // Go back home
+  $('.navbar-brand').on('click',function(){
+    $('.main').empty()
+              .append($jumbotron);
+
+  $('.nav').children().removeClass('active');
+
+
+  });
+
+  // Get top drinks
+  $('body').on('click','.top-drinks',function(){
+    console.log("Clicked on top drinks");
+    
+    $('.main').empty()
+              .append(myCabinet.create());
+
+    $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
+
+  });
   
 });
