@@ -35,8 +35,27 @@ var DrnkMxr = (function(){
     Drink.prototype.create = function(){
 
       var drinkEl = $('<div>');
-      drinkEl.addClass('drink')
-              .append('<h2>' + this.name)
+      drinkEl.addClass('drink');
+
+      var ratingEl = $('<div>')
+              .addClass('rating')
+              .addClass('col-xs-2')
+              .append('<span class="fui-triangle-up-small up"></span>')
+              .append(this.votes)
+              .append('<span class="fui-triangle-down-small down"></span>');
+
+
+
+      var nameEl = $('<div class="col-xs-10 drink-name">')
+            .append('<h2>' + this.name);
+
+      var row = $('<div>')
+            .addClass('row')
+            .addClass('drink-header')
+            .append(nameEl)
+            .append(ratingEl);
+
+      drinkEl.append(row)
               .append('<p class="instr">' + this.instructions);
 
       return drinkEl;
@@ -99,6 +118,25 @@ var DrnkMxr = (function(){
     };
 
     /**
+     * Sort a cabinet based on a property and direction
+     * @param  {string} property      name, base, votes
+     * @param  {string} direction     asc or desc; defaults to desc if no arg given
+     * @return {array}                sorted drinks array
+     */
+    Cabinet.prototype.sortBy = function(property, direction){
+      if (direction && direction.toLowerCase() === "asc"){
+        return  _.sortBy(this.drinks, function(drink){
+                return drink[property];
+              });
+      } 
+      else {
+        return _.sortBy(this.drinks, function(drink){
+          return -(drink[property]);
+        });
+      }
+    };
+
+    /**
      * Load in a series of drinks from a properly-defined array of objects
      * @param  {array} array         Array of drink objects
      */
@@ -146,7 +184,7 @@ var myCabinet = new DrnkMxr.Cabinet();
 
 myCabinet.autoLoad(drinksList);
 
-console.log(myCabinet.toString());
+// console.log(myCabinet.toString());
 
 
 
@@ -167,10 +205,13 @@ $(document).on('ready', function() {
   // Get top drinks
   $('body').on('click','.top-drinks',function(){
     console.log("Clicked on top drinks");
+
+    myCabinet.drinks = myCabinet.sortBy("votes");
     
     $('.main').empty()
               .append(myCabinet.create());
 
+    // Adjust navigation link
     $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
 
   });

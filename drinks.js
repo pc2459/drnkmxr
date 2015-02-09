@@ -7,7 +7,7 @@ var drinksList = [
                     "bitters"
                   ],
     instructions : "Place ice in a cocktail shaker. Add 2 parts whiskey to 1 part vermouth and 2 dashes of bitters. Rub orange peel around rim of the cocktail glass. Strain the drink into the glass. Add 1 to 2 maraschino cherries.",
-    votes : 0
+    votes : 10
   },
 
   {
@@ -18,7 +18,7 @@ var drinksList = [
                     "bitters"
                   ],
     instructions : "Place 1 teaspoon sugar in an old fashioned glass. Douse with bitters, add a few drops of water and stir until sugar is dissolved. Add 2 oz whiskey, stir. Add ice cubes. ",
-    votes : 0
+    votes : 20
   },
 
   {
@@ -41,7 +41,7 @@ var drinksList = [
                     "bitters"
                   ],
     instructions : "Place ice in cocktail shaker. Add 2 parts gin to 1 part dry vermouth and a dash of orange bitters. Strain drink into cocktail glass.",
-    votes : 0
+    votes : 40
   },
 
   {
@@ -53,7 +53,7 @@ var drinksList = [
                     "bitters"
                   ],
     instructions : "Place ice in cocktail shaker. Add 2 parts whiskey to 1 part dry vermouth, a quarter part maraschino liqueur, and a few dashes of orange or Angostura bitters. Strain drink into cocktail glass.",
-    votes : 0
+    votes : 40
   },
 
   {
@@ -64,7 +64,7 @@ var drinksList = [
                     "sugar"
                   ],
     instructions : "Pour 1 teaspoon sugar and 3/4 oz lime juice into cocktail shaker and stir until sugar is dissolved. Add 2 oz rum and shake well. Strain drink into cocktail glass.",
-    votes : 0
+    votes : 50
   },
 
   {
@@ -77,7 +77,7 @@ var drinksList = [
                     "simple syrup"
                   ],
     instructions : "Combine 3/4 cup lemon juice, 3/4 cup lime juice, 3 1/2 cup tequila, 2 cups triple sec, 1/2 cup simple syrup and 2 quarts of ice cubes in a large pitcher. Serve in salt-rimmed glasses filled with ice. Makes 10.",
-    votes : 0
+    votes : 10
   },
 
   {
@@ -88,7 +88,7 @@ var drinksList = [
                     "lemon juice"
                   ],
     instructions : "Combine 2 parts brandy, 1 part Cointreau, 3/4 parts lemon juice in a cocktail shaker and fill with ice. Shake well. Strain into glass.",
-    votes : 0
+    votes : 100
   },
 
   {
@@ -100,7 +100,7 @@ var drinksList = [
                     "champagne"
                   ],
     instructions : "Fill cocktail shaker with ice. Shake 2 oz gin, 1 oz lemon juice, 2 teaspoons sugar in shaker until well-chilled. Strain into champagne flute. Top with champagne.",
-    votes : 0
+    votes : 70
   },
 
   {
@@ -111,7 +111,7 @@ var drinksList = [
                     "vermouth"
                   ],
     instructions : "Combine 1 part gin to 1 part Campari to 1 part sweet vermouth in a cocktail shaker filled with ice. Strain into a cocktail glass. ",
-    votes : 0
+    votes : 50
   },
 
   {
@@ -123,7 +123,7 @@ var drinksList = [
                     "sugar"
                   ],
     instructions : "Combine 1 teaspoon sugar, 3 dashes bitters, and a few drops of water in a cocktail shaker until sugar is dissolved. Add whiskey and plenty of ice. Stir. Pour 1 teaspoon absinthe into a cocktail glass, coat the sides, discard excess. Strain drink into the glass. Garnish with lemon peel.",
-    votes : 0
+    votes : 60
   },
 
   {
@@ -139,7 +139,7 @@ var drinksList = [
                     "seltzer"
                   ],
     instructions : "Combine 2 oz gin, 1 oz cream, 1 egg white, 1/2 oz each lemon and lime juice, 2 teaspoons sugar, and 2-3 drops orange flower water in a cocktail shaker filled with ice. Shake hard for two minutes until foamy. Strain into a Collins glass and top with seltzer to taste.",
-    votes : 0
+    votes : 20
   },
 
   {
@@ -150,7 +150,7 @@ var drinksList = [
                     "mint"
                   ],
     instructions : "Place 1 teaspoon sugar and 1 teaspoon water at bottom of a tall glass and stir until sugar is dissolve. Add 10 mint leaves and muddle, taking care not to overwork the leaves. Half-fill the glass with crushed ice. Add 2-3 oz bourbon. Add more crushed ice if needed to fill.",
-    votes : 0
+    votes : 30
   },
 
   {
