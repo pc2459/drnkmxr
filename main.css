@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  background-color: #F1C40F;
+  /*background-color: #F1C40F;*/
 }
 
 /*a:hover {
@@ -31,9 +31,6 @@ body {
   border-radius: 100px;
   line-height: 200px;
   background: #C0392B;
-}
-
-.btn-circle {
   color: #ECF0F1;
   margin: 0 auto;
 }

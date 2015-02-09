@@ -22,7 +22,6 @@ var DrnkMxr = (function(){
       this.instructions = instructions;
       this.votes = votes || 0;
       this.id = _.uniqueId();
-      console.log(_.uniqueId);
     };
 
 
@@ -174,6 +173,29 @@ var DrnkMxr = (function(){
       });
     };
 
+    Cabinet.prototype.createBases = function(){
+      // Get array of unique bases from all the drinks in the cabinet
+      var allBases = _.pluck(this.drinks, "base");
+
+      var uniqueBases = _.uniq(allBases);
+
+      var countedBases = _.countBy(allBases);
+
+      return _.map(uniqueBases,function(base){
+          //for each base...
+          var wrapper = $('<div>')
+                .addClass('option')
+                .addClass('col-sm-6');
+          var inner = $('<a href="#" id="'+ base +'">')
+                .addClass('btn-circle')
+                .append(base)
+                .append(' (' + countedBases[base] + ')');
+
+          return wrapper.append(inner);
+
+      });
+    };
+
     Cabinet.prototype.create = function(){
 
       var drinkEls = _.map(this.drinks,function(drink){
@@ -228,6 +250,20 @@ $(document).on('ready', function() {
 
 
   });
+
+  // Get drinks by base 
+  $('body').on('click','.by-base', function(){
+    console.log("Clicked on by base");
+    
+    $('.main').empty()
+              .append(myCabinet.createBases());
+
+    // Adjust navigation link
+    $('#by-base').parent().addClass('active').siblings().removeClass('active');           
+
+  });
+
+
 
   // Get top drinks
   $('body').on('click','.top-drinks',function(){
