@@ -1,0 +1,14 @@
+ Phase 1:
+  ✔ Base: get summary view working @done (15-02-09 14:17)
+  ✔ Base: get individual views working @done (15-02-09 14:17)
+  ☐ Base: feature top cocktail
+  ☐ Ingredients: design UI for search bar
+  ☐ Ingredients: append search criteria to DOM
+  ☐ Ingredients: hook up search criteria to filter
+  ☐ Ingredients: add list of common ingredients
+  ☐ Top drinks: feature top drink
+  ☐ All: rig up rating UI
+ Phase 2:
+  ☐ Ingredients: Auto-complete for searchbar
+  ☐ All: rig up localStorage
+  ☐ All: reconfigure using Handlebars

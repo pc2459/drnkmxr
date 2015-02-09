@@ -33,10 +33,16 @@ var DrnkMxr = (function(){
       return this.name + " (" + this.base + ")";
     };
 
+
+    /**
+     * Create a drink DOM element, without accordioning.
+     * @return {jQuery DOM el}      Drink DOM element
+     */
     Drink.prototype.create = function(){
 
       var drinkEl = $('<div>');
-      drinkEl.addClass('drink');
+      drinkEl.addClass('drink')
+              .attr('id', this.id);
 
       var ratingEl = $('<div>')
               .addClass('rating')
@@ -61,10 +67,15 @@ var DrnkMxr = (function(){
     };
 
 
+    /**
+     * Create an accordioned drink DOM element
+     * @return {jQuery DOM el}     Drink DOM element, accordioned
+     */
     Drink.prototype.createCollapsed = function(){
 
-      var drinkEl = $('<div>');
-      drinkEl.addClass('drink');
+      this.$drinkEl = $('<div>');
+      this.$drinkEl.addClass('drink')
+             .attr('id', this.id);
 
       var ratingEl = $('<div>')
               .addClass('rating')
@@ -82,19 +93,21 @@ var DrnkMxr = (function(){
             .append(nameEl)
             .append(ratingEl);
 
-      drinkEl.append(row)
+      this.$drinkEl.append(row)
               .append('<p class="instr collapse" id="collapse'+ this.id +'">' + this.instructions);
 
-      return drinkEl;
+      return this.$drinkEl;
     };
+
 
     /**
      * Drink rate method for changing votes 
-     * @param  {number} delta         +1 or -1 vote 
+     * @param  {number} delta         1 or -1 vote 
      */
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
+      this.$drinkEl = this.createCollapsed();
     };
 
     return Drink;
@@ -135,6 +148,7 @@ var DrnkMxr = (function(){
       _.union(this.ingredients, ingredients);
     };
 
+
     /**
      * Cabinet toString method
      * @return {string}               List of drinks with their bases
@@ -142,6 +156,7 @@ var DrnkMxr = (function(){
     Cabinet.prototype.toString = function(){
       return  _.map(this.drinks, function(drink){ return drink.toString(); }).join("\n");
     };
+
 
     /**
      * Sort a cabinet based on a property and direction
@@ -162,6 +177,7 @@ var DrnkMxr = (function(){
       }
     };
 
+
     /**
      * Load in a series of drinks from a properly-defined array of objects
      * @param  {array} array         Array of drink objects
@@ -173,6 +189,11 @@ var DrnkMxr = (function(){
       });
     };
 
+
+    /**
+     * Create bases "view" as a DOM element
+     * @return {jQuery DOM el}         Bases view DOM element
+     */
     Cabinet.prototype.basesView = function(){
       // Get array of unique bases from all the drinks in the cabinet
       var allBases = _.pluck(this.drinks, "base");
@@ -196,17 +217,41 @@ var DrnkMxr = (function(){
       });
     };
 
+    /**
+     * Render a cabinet filtered according to a given base
+     * @param  {string} base          Base alcohol to filter by
+     * @return {jQuery DOM el}        Cabinet DOM element
+     */
     Cabinet.prototype.createByBase = function(base){
       // Get all drinks of a certain base
       var baseDrinks = _.filter(this.drinks, function(drink){
         return drink.base === base;
       });
 
-      return _.map(baseDrinks, function(drink){
+      baseDrinks = _.sortBy(baseDrinks, function(drink){
+        return -(drink.votes);
+      });
+
+      var featured = _.first(baseDrinks).create();
+      var remainder =  _.map(_.rest(baseDrinks), function(drink){
         return drink.createCollapsed();
       });
 
+      return featured.append(remainder);
 
+
+    };
+
+    Cabinet.prototype.featureFirst = function(){
+      return _.first(this.drinks).create();
+    }
+
+    Cabinet.prototype.createRemainder = function(){
+      var drinkEls = _.map(_.rest(this.drinks),function(drink){
+        return drink.createCollapsed();
+      });
+
+      return drinkEls;
     };
 
     Cabinet.prototype.create = function(){
@@ -216,7 +261,6 @@ var DrnkMxr = (function(){
       });
 
       return drinkEls;
-
     };
 
 
@@ -252,6 +296,45 @@ myCabinet.autoLoad(drinksList);
 
 $(document).on('ready', function() {
 
+  ///////////////////
+  // RATING SYSTEM //
+  ///////////////////
+  
+  $('body').on('click','.up', function(){
+    var drinkID = $(this).closest('.drink').attr('id');
+    var drinkEl = $(this).closest('.drink');
+    var drink = _.find(myCabinet.drinks, function(drink){
+      return drink.id === drinkID;
+    });
+    
+    //Rate the drink
+    drink.rate(1);
+
+    //Update the DOM element
+    drinkEl.empty().append(drink.$drinkEl);
+
+  });
+
+  $('body').on('click','.down', function(){
+    var drinkID = $(this).closest('.drink').attr('id');
+    var drinkEl = $(this).closest('.drink');
+    var drink = _.find(myCabinet.drinks, function(drink){
+      return drink.id === drinkID;
+    });
+    
+    //Rate the drink
+    drink.rate(-1);
+
+    //Update the DOM element
+    drinkEl.empty().append(drink.$drinkEl);
+
+  });
+
+
+  //////////
+  // HOME //
+  //////////
+
   var $jumbotron = $('.jumbotron').clone();
 
   // Go back home
@@ -259,10 +342,12 @@ $(document).on('ready', function() {
     $('.main').empty()
               .append($jumbotron);
 
-  $('.nav').children().removeClass('active');
-
-
+    $('.nav').children().removeClass('active');
   });
+
+  /////////////
+  // BY BASE //
+  /////////////
 
   // Get drinks by base 
   $('body').on('click','.by-base', function(){
@@ -284,13 +369,13 @@ $(document).on('ready', function() {
 
       $('.main').empty()
                 .append(myCabinet.createByBase(base));
-
-
     });
 
   });           
 
-
+  ////////////////
+  // TOP DRINKS //
+  ////////////////
 
   // Get top drinks
   $('body').on('click','.top-drinks',function(){
@@ -299,7 +384,8 @@ $(document).on('ready', function() {
     myCabinet.drinks = myCabinet.sortBy("votes");
     
     $('.main').empty()
-              .append(myCabinet.create());
+              .append(myCabinet.featureFirst())
+              .append(myCabinet.createRemainder());
 
     // Adjust navigation link
     $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
