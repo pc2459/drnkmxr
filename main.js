@@ -244,7 +244,7 @@ var DrnkMxr = (function(){
 
     Cabinet.prototype.featureFirst = function(){
       return _.first(this.drinks).create();
-    }
+    };
 
     Cabinet.prototype.createRemainder = function(){
       var drinkEls = _.map(_.rest(this.drinks),function(drink){
@@ -263,6 +263,12 @@ var DrnkMxr = (function(){
       return drinkEls;
     };
 
+    Cabinet.prototype.getIngredients = function(){
+      return _.chain(this.drinks).pluck("ingredients").flatten().uniq().value();
+    };
+
+
+    
 
 
 
@@ -279,12 +285,15 @@ var DrnkMxr = (function(){
 
   var DrnkMxr = {
     Drink   : Drink,
-    Cabinet : Cabinet
+    Cabinet : Cabinet,
+    
   };
 
   return DrnkMxr;
 
 })();
+
+
 
 var myCabinet = new DrnkMxr.Cabinet();
 
@@ -295,6 +304,8 @@ myCabinet.autoLoad(drinksList);
 
 
 $(document).on('ready', function() {
+
+
 
   ///////////////////
   // RATING SYSTEM //
@@ -371,7 +382,54 @@ $(document).on('ready', function() {
                 .append(myCabinet.createByBase(base));
     });
 
-  });           
+  });    
+
+  /////////////////////
+  // BY INGREDIENTS //
+  ////////////////////
+  
+
+
+ 
+
+  var $search = $('#search-wrapper').clone().toggleClass('invisible');
+
+  $('body').on('click','.by-ingre',function(){
+    $('.main').empty()
+              .append($search);
+
+    var ingredientsList = new Bloodhound({
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      limit: 4,
+      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
+     });  
+
+
+    ingredientsList.initialize();
+    $('input.tagsinput').tagsinput();
+    $('input.tagsinput-typeahead').tagsinput('input').typeahead(null, {
+      name: 'ingredientsList',
+      displayKey: 'word',
+      source: ingredientsList.ttAdapter()
+    });
+
+    // $('input.tagsinput-typeahead').tagsinput('input').typeahead(null, {
+    //   name: 'ingredientsList',
+    //   displayKey: 'word',
+    //   source: ingredientsList.ttAdapter()
+    // });
+
+
+
+  });
+
+
+
+
+
+
+
 
   ////////////////
   // TOP DRINKS //
