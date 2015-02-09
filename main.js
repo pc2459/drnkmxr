@@ -173,7 +173,7 @@ var DrnkMxr = (function(){
       });
     };
 
-    Cabinet.prototype.createBases = function(){
+    Cabinet.prototype.basesView = function(){
       // Get array of unique bases from all the drinks in the cabinet
       var allBases = _.pluck(this.drinks, "base");
 
@@ -194,6 +194,19 @@ var DrnkMxr = (function(){
           return wrapper.append(inner);
 
       });
+    };
+
+    Cabinet.prototype.createByBase = function(base){
+      // Get all drinks of a certain base
+      var baseDrinks = _.filter(this.drinks, function(drink){
+        return drink.base === base;
+      });
+
+      return _.map(baseDrinks, function(drink){
+        return drink.createCollapsed();
+      });
+
+
     };
 
     Cabinet.prototype.create = function(){
@@ -256,12 +269,26 @@ $(document).on('ready', function() {
     console.log("Clicked on by base");
     
     $('.main').empty()
-              .append(myCabinet.createBases());
+              .append(myCabinet.basesView());
 
     // Adjust navigation link
-    $('#by-base').parent().addClass('active').siblings().removeClass('active');           
-
+    $('#by-base').parent().addClass('active').siblings().removeClass('active');
   });
+
+
+  // Render each base list
+  _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(),function(base){
+
+    $('body').on('click','#'+base, function(){
+      console.log("This can't have worked");
+
+      $('.main').empty()
+                .append(myCabinet.createByBase(base));
+
+
+    });
+
+  });           
 
 
 
