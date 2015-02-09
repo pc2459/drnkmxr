@@ -21,6 +21,8 @@ var DrnkMxr = (function(){
       this.ingredients = ingredients;
       this.instructions = instructions;
       this.votes = votes || 0;
+      this.id = _.uniqueId();
+      console.log(_.uniqueId);
     };
 
 
@@ -44,8 +46,6 @@ var DrnkMxr = (function(){
               .append(this.votes)
               .append('<span class="fui-triangle-down-small down"></span>');
 
-
-
       var nameEl = $('<div class="col-xs-10 drink-name">')
             .append('<h2>' + this.name);
 
@@ -61,6 +61,33 @@ var DrnkMxr = (function(){
       return drinkEl;
     };
 
+
+    Drink.prototype.createCollapsed = function(){
+
+      var drinkEl = $('<div>');
+      drinkEl.addClass('drink');
+
+      var ratingEl = $('<div>')
+              .addClass('rating')
+              .addClass('col-xs-2')
+              .append('<span class="fui-triangle-up-small up"></span>')
+              .append(this.votes)
+              .append('<span class="fui-triangle-down-small down"></span>');
+
+      var nameEl = $('<div class="col-xs-10 drink-name">')
+            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h2>' + this.name);
+
+      var row = $('<div>')
+            .addClass('row')
+            .addClass('drink-header')
+            .append(nameEl)
+            .append(ratingEl);
+
+      drinkEl.append(row)
+              .append('<p class="instr collapse" id="collapse'+ this.id +'">' + this.instructions);
+
+      return drinkEl;
+    };
 
     /**
      * Drink rate method for changing votes 
@@ -150,7 +177,7 @@ var DrnkMxr = (function(){
     Cabinet.prototype.create = function(){
 
       var drinkEls = _.map(this.drinks,function(drink){
-        return drink.create();
+        return drink.createCollapsed();
       });
 
       return drinkEls;
