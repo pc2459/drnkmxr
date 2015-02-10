@@ -1,3 +1,6 @@
+var drinksFB = new Firebase("https://shining-fire-3793.firebaseio.com/drinks");
+
+
 var DrnkMxr = (function(){
 
   /////////////////
@@ -14,15 +17,29 @@ var DrnkMxr = (function(){
      * @param {string} instructions   Full-text instructions
      * @param {number} votes          Votes
      */
-    var Drink = function(name, base, ingredients, instructions, votes){
+    var Drink = function(name, base, ingredients, instructions, votes, id){
       
       this.name = name;
       this.base = base;
       this.ingredients = ingredients;
       this.instructions = instructions;
       this.votes = votes || 0;
-      this.id = _.uniqueId();
+      
+
+      // // Push to the database
+      // var newFBdrink = drinksFB.push( {
+      //       name          : this.name,
+      //       base          : this.base,
+      //       ingredients   : this.ingredients,
+      //       instructions  : this.instructions,
+      //       votes         : this.votes
+      //   }
+      // );
+
+      this.id = id;
     };
+
+
 
     /**
      * Return string describing name and base of a drink
@@ -168,6 +185,14 @@ var DrnkMxr = (function(){
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
+      drinksFB.child(this.id).update({ "votes" : this.votes }, function(error){
+        if (error) {
+          console.log("Something went wrong");
+        }
+        else {
+          console.log("All went well");
+        }
+      });
       
     };
 
@@ -336,6 +361,17 @@ var DrnkMxr = (function(){
       });
     };
 
+    Cabinet.prototype.autoFBLoad = function(){
+      var cabinet = this;
+      drinksFB.on("child_added", function(snapshot){
+        return cabinet.addDrink(snapshot.val().name, snapshot.val().base, snapshot.val().ingredients, snapshot.val().instructions, snapshot.val().votes, snapshot.key());
+        // console.log(snapshot.val().name);
+      })
+
+      console.log()
+
+    };
+
     /**
      * Create bases "view" as a DOM element
      * @return {jQuery DOM el}         Bases view DOM element
@@ -469,7 +505,7 @@ var DrnkMxr = (function(){
 })();
 
 var myCabinet = new DrnkMxr.Cabinet();
-myCabinet.autoLoad(drinksList);
+myCabinet.autoFBLoad();
 
 
 $(document).on('ready', function() {
