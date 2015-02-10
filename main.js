@@ -153,6 +153,12 @@ var DrnkMxr = (function(){
       this.searchCriteria.push(item);
     };
 
+    Cabinet.prototype.removeSearchItem = function(item){
+      this.searchCriteria = _.filter(this.searchCriteria, function(ingre){
+        return ingre !== item;
+      })
+    };
+
     Cabinet.prototype.clearSearchItems = function(){
       this.searchCriteria = [];
     };
@@ -423,9 +429,23 @@ $(document).on('ready', function() {
     $('.search-criteria').append(ingreLi);
 
     $('#ingredient-search').val("");
-
+    console.log("Search criteria:", myCabinet.searchCriteria);
 
   });
+
+  // Remove ingredient criteria
+  $('body').on('click','.remove',function(){
+    var ingre = $(this).closest('.ingre').text();
+    var ingreEl = $(this).closest('.tag');
+    console.log(ingre);
+
+    ingreEl.remove();
+
+    myCabinet.removeSearchItem(ingre);
+    console.log("Search criteria:", myCabinet.searchCriteria);
+
+  }); 
+  
 
   ////////////////
   // TOP DRINKS //
