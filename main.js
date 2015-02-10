@@ -392,27 +392,32 @@ $(document).on('ready', function() {
 
  
 
-  var $search = $('#search-wrapper').clone().toggleClass('invisible');
+  var $search = $('.search-wrapper').clone().removeClass('invisible');
+  console.log("Search declared");
+
+  var ingredientsList = new Bloodhound({
+    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    limit: 4,
+    local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
+   });  
+  ingredientsList.initialize();
 
   $('body').on('click','.by-ingre',function(){
+
+
+    
     $('.main').empty()
               .append($search);
+              console.log($search);
 
-    var ingredientsList = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      limit: 4,
-      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
-     });  
-
-
-    ingredientsList.initialize();
-    $('input.tagsinput').tagsinput();
-    $('input.tagsinput-typeahead').tagsinput('input').typeahead(null, {
+    $('#ingredient-search').typeahead(null, {
       name: 'ingredientsList',
       displayKey: 'word',
       source: ingredientsList.ttAdapter()
     });
+
+
 
     // $('input.tagsinput-typeahead').tagsinput('input').typeahead(null, {
     //   name: 'ingredientsList',
