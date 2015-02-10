@@ -374,35 +374,65 @@ var DrnkMxr = (function(){
       });
 
       return featured.append(remainder);
-
-
     };
 
 
-
+    /**
+     * Create an uncollapsed DOM element of the first element in the drinks array
+     * @return {[type]} [description]
+     */
     Cabinet.prototype.featureFirst = function(){
       return _.first(this.drinks).create();
     };
 
+    /**
+     * Create the 2nd to nth items of the drinks array as collapsed DOM elements
+     * @return {[type]} [description]
+     */
     Cabinet.prototype.createRemainder = function(){
-      var drinkEls = _.map(_.rest(this.drinks),function(drink){
+      return _.map(_.rest(this.drinks),function(drink){
         return drink.createCollapsed();
       });
-
-      return drinkEls;
     };
 
+    /**
+     * Create collapsed DOM elements of all drinks
+     * @return {[type]} [description]
+     */
     Cabinet.prototype.create = function(){
-
-      var drinkEls = _.map(this.drinks,function(drink){
+      return _.map(this.drinks,function(drink){
         return drink.createCollapsed();
       });
-
-      return drinkEls;
     };
 
+    /**
+     * Get a list of unique ingredients used by all drinks in the cabinet
+     * @return {array}                Array of all ingredients
+     */
     Cabinet.prototype.getIngredients = function(){
       return _.chain(this.drinks).pluck("ingredients").flatten().uniq().value();
+    };
+
+    Cabinet.prototype.createCommonTags = function(n){
+      var allIngredients = _.chain(this.drinks)
+                            .pluck("ingredients")
+                            .flatten()
+                            .countBy()
+                            .pairs()
+                            .sortBy(1)
+                            .reverse()
+                            .first(n)
+                            .value();
+      console.log(allIngredients);
+
+      return _.map(allIngredients, function(ingre){
+        var ingreEl = $('<span>')
+              .addClass('common-ingre')
+              .addClass('tag')
+              .append('<span class="ingre-name">' + ingre[0] + '</span>' + ' (' + ingre[1] + ')' + '<span class="add">');
+        return ingreEl;
+      })
+
     };
 
     var _sortByVotes = function(array){
@@ -542,6 +572,9 @@ $(document).on('ready', function() {
       source: ingredientsList.ttAdapter()
     });
 
+    // Render common ingredients
+    $('.common-tags-wrapper').append(myCabinet.createCommonTags(5));
+
     // Adjust navigation link
     $('#by-ingre').parent().addClass('active').siblings().removeClass('active');
 
@@ -562,17 +595,45 @@ $(document).on('ready', function() {
     else{
       myCabinet.addSearchItem(ingre);
 
-      var ingreLi = $('<span>')
+      var ingreEl = $('<span>')
                     .addClass('ingre')
                     .addClass('tag')
                     .append(ingre + '<span class="remove">');
 
-      $('.search-criteria').append(ingreLi);
+      $('.search-criteria').append(ingreEl);
       $('#ingredient-search').val("");
       $('.results').empty()
                   .append(myCabinet.createBySearchItems())
                   .append(myCabinet.createByMissingItems());
     }    
+  });
+
+  // Add from common ingredients
+  
+  $('body').on('click','.common-ingre',function(){
+
+    var ingre = $(this).find('.ingre-name').text();
+    
+    // Check if ingre is in the cabinet already
+    if (_.contains(myCabinet.searchCriteria,ingre)){
+      $('.warnings').append($alert);
+    }
+    else{
+      myCabinet.addSearchItem(ingre);
+
+      var ingreEl = $('<span>')
+                    .addClass('ingre')
+                    .addClass('tag')
+                    .append(ingre + '<span class="remove">');
+
+      $('.search-criteria').append(ingreEl);
+      $(this).remove();
+      $('.results').empty()
+                  .append(myCabinet.createBySearchItems())
+                  .append(myCabinet.createByMissingItems());
+
+    }  
+
   });
 
 
@@ -585,6 +646,10 @@ $(document).on('ready', function() {
 
     myCabinet.removeSearchItem(ingre);
     console.log("Search criteria:", myCabinet.searchCriteria);
+
+    $('.results').empty()
+                .append(myCabinet.createBySearchItems())
+                .append(myCabinet.createByMissingItems());
 
   }); 
   

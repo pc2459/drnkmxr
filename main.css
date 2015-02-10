@@ -138,6 +138,39 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.add {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 100%;
+  padding: 0 10px 0 0;
+  font-size: 12px;
+  color: #fff;
+  text-align: right;
+  text-decoration: none;
+  cursor: pointer;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  -webkit-transition: opacity .25s linear;
+          transition: opacity .25s linear;
+}
+
+.add:after {
+    font-family: "Flat-UI-Icons";
+  line-height: 27px;
+  content: "\e608";
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.add:hover {
+  filter: none;
+  opacity: 1;
+}
+
 .tag:hover {
   padding-right: 28px;
   padding-left: 14px;
@@ -146,7 +179,7 @@ html {
 }
 
 .remove:hover {
-          filter: none;
+  filter: none;
   opacity: 1;
 }
 
