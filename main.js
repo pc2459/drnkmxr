@@ -1,5 +1,5 @@
 var drinksFB = new Firebase("https://shining-fire-3793.firebaseio.com/drinks");
-
+console.log(drinksFB);
 
 var DrnkMxr = (function(){
 
@@ -24,7 +24,9 @@ var DrnkMxr = (function(){
       this.ingredients = ingredients;
       this.instructions = instructions;
       this.votes = votes || 0;
-      
+      console.log("THE ID:", id);
+      this.id = id;
+      console.log("This drink's ID:", this.id);
 
       // // Push to the database
       // var newFBdrink = drinksFB.push( {
@@ -36,7 +38,7 @@ var DrnkMxr = (function(){
       //   }
       // );
 
-      this.id = id;
+      
     };
 
 
@@ -185,6 +187,7 @@ var DrnkMxr = (function(){
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
+      console.log(this);
       drinksFB.child(this.id).update({ "votes" : this.votes }, function(error){
         if (error) {
           console.log("Something went wrong");
@@ -225,10 +228,10 @@ var DrnkMxr = (function(){
      * @param {string} instructions   Full-text instructions
      * @param {number} votes          Votes
      */
-    Cabinet.prototype.addDrink = function(name, base, ingredients, instructions, votes){
+    Cabinet.prototype.addDrink = function(name, base, ingredients, instructions, votes, id){
 
       // Add drink to the cabinet
-      var newDrink = new Drink(name, base, ingredients, instructions, votes);
+      var newDrink = new Drink(name, base, ingredients, instructions, votes, id);
       this.drinks.push(newDrink);
 
       // Update the master list of ingredients
@@ -364,8 +367,14 @@ var DrnkMxr = (function(){
     Cabinet.prototype.autoFBLoad = function(){
       var cabinet = this;
       drinksFB.on("child_added", function(snapshot){
-        return cabinet.addDrink(snapshot.val().name, snapshot.val().base, snapshot.val().ingredients, snapshot.val().instructions, snapshot.val().votes, snapshot.key());
-        // console.log(snapshot.val().name);
+        console.log(typeof snapshot.key());
+        return cabinet.addDrink(snapshot.val().name, 
+                                snapshot.val().base, 
+                                snapshot.val().ingredients, 
+                                snapshot.val().instructions, 
+                                snapshot.val().votes, 
+                                snapshot.key());
+        
       })
 
       console.log()
