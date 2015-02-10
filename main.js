@@ -24,7 +24,6 @@ var DrnkMxr = (function(){
       this.id = _.uniqueId();
     };
 
-
     /**
      * Return string describing name and base of a drink
      */
@@ -32,7 +31,6 @@ var DrnkMxr = (function(){
 
       return this.name + " (" + this.base + ")";
     };
-
 
     /**
      * Create a drink DOM element, without accordioning.
@@ -52,7 +50,7 @@ var DrnkMxr = (function(){
               .append('<span class="fui-triangle-down-small down"></span>');
 
       var nameEl = $('<div class="col-xs-10 drink-name">')
-            .append('<h4>' + this.name);
+            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
 
       var row = $('<div>')
             .addClass('row')
@@ -63,7 +61,7 @@ var DrnkMxr = (function(){
       var ingreEls = $('<ul class="ingres">')
                   .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
 
-      var collapse = $('<div class="instr">')
+      var collapse = $('<div class="instr collapse in" id="collapse'+ this.id +'">')
                     .append(ingreEls)
                     .append('<p class="instr">' + this.instructions);
 
@@ -118,8 +116,6 @@ var DrnkMxr = (function(){
      * @return {jQuery DOM el}     Drink DOM element, accordioned
      */
     Drink.prototype.createCollapsedMissing = function(){
-
-  
 
       this.$drinkEl = $('<div>');
       this.$drinkEl.addClass('drink')
@@ -214,20 +210,34 @@ var DrnkMxr = (function(){
       _.union(this.ingredients, ingredients);
     };
 
+    /**
+     * Add an ingredient to the search criteria
+     */
     Cabinet.prototype.addSearchItem = function(item){
       this.searchCriteria.push(item);
     };
 
+    /**
+     * Remove an ingredient from the search criteria
+     * @param  {string} item        Ingredient to be removed
+     */
     Cabinet.prototype.removeSearchItem = function(item){
       this.searchCriteria = _.filter(this.searchCriteria, function(ingre){
         return ingre !== item;
       })
     };
 
+    /**
+     * Reset search criteria
+     */
     Cabinet.prototype.clearSearchItems = function(){
       this.searchCriteria = [];
     };
 
+    /**
+     * Create list of drinks from the cabinet per search filter
+     * @return {jquery DOM}           array of jQuery DOM elements 
+     */
     Cabinet.prototype.createBySearchItems = function(){
 
       // Filter down to a list of drinks whose ingredients list is a subset of the 
@@ -252,10 +262,12 @@ var DrnkMxr = (function(){
       return _.map(matchedDrinks,function(drink){
         return drink.createCollapsed();
       })      
-
-
     };
 
+    /**
+     * Create list of drinks from the cabinet that are missing ingredients per the search filter
+     * @return {jquery DOM}           array of jQuery DOM elements 
+     */
     Cabinet.prototype.createByMissingItems = function(){
 
       var missedDrinks = []
@@ -272,6 +284,7 @@ var DrnkMxr = (function(){
         }
       });
 
+      // Sort the drinks by votes, and then by least number of missing items
       missedDrinks = _sortByVotes(missedDrinks);
       missedDrinks = _.sortBy(missedDrinks, function(drink){
         return drink.missing;
@@ -281,10 +294,8 @@ var DrnkMxr = (function(){
         return drink.createCollapsedMissing();
       })
 
-
       return missedDrinks;
-
-    }
+    };
 
 
     /**
@@ -294,7 +305,6 @@ var DrnkMxr = (function(){
     Cabinet.prototype.toString = function(){
       return  _.map(this.drinks, function(drink){ return drink.toString(); }).join("\n");
     };
-
 
     /**
      * Sort a cabinet based on a property and direction
@@ -315,7 +325,6 @@ var DrnkMxr = (function(){
       }
     };
 
-
     /**
      * Load in a series of drinks from a properly-defined array of objects
      * @param  {array} array         Array of drink objects
@@ -326,7 +335,6 @@ var DrnkMxr = (function(){
        return cabinet.addDrink(drinkObj.name, drinkObj.base, drinkObj.ingredients, drinkObj.instructions, drinkObj.votes);
       });
     };
-
 
     /**
      * Create bases "view" as a DOM element
@@ -435,6 +443,7 @@ var DrnkMxr = (function(){
 
     };
 
+    // Helper function to sort drink arrays by votes
     var _sortByVotes = function(array){
       return _.sortBy(array, function(drink){
         return -(drink.votes);
@@ -460,7 +469,6 @@ var DrnkMxr = (function(){
 })();
 
 var myCabinet = new DrnkMxr.Cabinet();
-
 myCabinet.autoLoad(drinksList);
 
 
@@ -482,7 +490,6 @@ $(document).on('ready', function() {
 
     //Update the DOM element
     votesEl.html(drink.votes);
-
   });
 
   $('body').on('click','.down', function(){
@@ -497,9 +504,7 @@ $(document).on('ready', function() {
 
     //Update the DOM element
     votesEl.html(drink.votes);
-
   });
-
 
   //////////
   // HOME //
@@ -507,7 +512,9 @@ $(document).on('ready', function() {
 
   var $jumbotron = $('.jumbotron').clone();
 
-  // Go back home
+  /**
+   * Go back home
+   */
   $('.navbar-brand').on('click',function(){
     $('.main').empty()
               .append($jumbotron);
@@ -519,7 +526,9 @@ $(document).on('ready', function() {
   // BY BASE //
   /////////////
 
-  // Get drinks by base 
+  /**
+   * Render mix by base "view"
+   */
   $('body').on('click','.by-base', function(){
     console.log("Clicked on by base");
     
@@ -531,7 +540,9 @@ $(document).on('ready', function() {
   });
 
 
-  // Render each base list
+  /**
+   * Render drinks by base
+   */
   _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(),function(base){
 
     $('body').on('click','#'+base, function(){
@@ -540,7 +551,6 @@ $(document).on('ready', function() {
       $('.main').empty()
                 .append(myCabinet.createByBase(base));
     });
-
   });    
 
   /////////////////////
@@ -548,6 +558,7 @@ $(document).on('ready', function() {
   ////////////////////
   
   var $search = $('.search-wrapper').clone().removeClass('invisible');
+  var $alert = $('.alert').clone().removeClass('invisible');
 
   // Initialise Bloodhound for typeahead
   var ingredientsList = new Bloodhound({
@@ -559,8 +570,13 @@ $(document).on('ready', function() {
   ingredientsList.initialize();
 
 
-  // Mix by ingredient view
+  /**
+   * Build mix by ingredient "view"
+   */
   $('body').on('click','.by-ingre',function(){
+
+    // Reset search criteria
+    myCabinet.clearSearchItems();
 
     $('.main').empty()
               .append($search);
@@ -573,17 +589,16 @@ $(document).on('ready', function() {
     });
 
     // Render common ingredients
-    $('.common-tags-wrapper').append(myCabinet.createCommonTags(5));
+    $('.common-tags-wrapper').empty().append(myCabinet.createCommonTags(5));
 
     // Adjust navigation link
     $('#by-ingre').parent().addClass('active').siblings().removeClass('active');
 
   });
 
-
-  $alert = $('.alert').clone().removeClass('invisible');
-
-  // Add ingredient criteria
+  /**
+   * Add ingredient criteria from search bar
+   */
   $('body').on('click','.btn-add',function(e){
     var ingre = $('#ingredient-search').val();
     e.preventDefault();
@@ -608,8 +623,10 @@ $(document).on('ready', function() {
     }    
   });
 
-  // Add from common ingredients
   
+  /**
+   * Add ingredient criteria from common ingredients list
+   */
   $('body').on('click','.common-ingre',function(){
 
     var ingre = $(this).find('.ingre-name').text();
@@ -619,6 +636,7 @@ $(document).on('ready', function() {
       $('.warnings').append($alert);
     }
     else{
+      // Add the item to the search
       myCabinet.addSearchItem(ingre);
 
       var ingreEl = $('<span>')
@@ -627,13 +645,15 @@ $(document).on('ready', function() {
                     .append(ingre + '<span class="remove">');
 
       $('.search-criteria').append(ingreEl);
+
+      // Remove the tag from the list
       $(this).remove();
+
+      // Update the results
       $('.results').empty()
                   .append(myCabinet.createBySearchItems())
                   .append(myCabinet.createByMissingItems());
-
     }  
-
   });
 
 
@@ -650,7 +670,6 @@ $(document).on('ready', function() {
     $('.results').empty()
                 .append(myCabinet.createBySearchItems())
                 .append(myCabinet.createByMissingItems());
-
   }); 
   
 
@@ -670,7 +689,5 @@ $(document).on('ready', function() {
 
     // Adjust navigation link
     $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
-
   });
-  
 });
