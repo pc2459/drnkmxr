@@ -127,6 +127,7 @@ var DrnkMxr = (function(){
     var Cabinet = function(){      
       this.drinks = [];
       this.ingredients = [];
+      this.searchCriteria = [];
 
     };
 
@@ -146,6 +147,14 @@ var DrnkMxr = (function(){
 
       // Update the master list of ingredients
       _.union(this.ingredients, ingredients);
+    };
+
+    Cabinet.prototype.addSearchItem = function(item){
+      this.searchCriteria.push(item);
+    };
+
+    Cabinet.prototype.clearSearchItems = function(){
+      this.searchCriteria = [];
     };
 
 
@@ -267,17 +276,9 @@ var DrnkMxr = (function(){
       return _.chain(this.drinks).pluck("ingredients").flatten().uniq().value();
     };
 
-
-    
-
-
-
     return Cabinet;
 
-
   })(); //end Cabinet
-
-
 
   /////////////////////////////////
   // Return all the constructors //
@@ -293,19 +294,12 @@ var DrnkMxr = (function(){
 
 })();
 
-
-
 var myCabinet = new DrnkMxr.Cabinet();
 
 myCabinet.autoLoad(drinksList);
 
-// console.log(myCabinet.toString());
-
-
 
 $(document).on('ready', function() {
-
-
 
   ///////////////////
   // RATING SYSTEM //
@@ -388,13 +382,9 @@ $(document).on('ready', function() {
   // BY INGREDIENTS //
   ////////////////////
   
-
-
- 
-
   var $search = $('.search-wrapper').clone().removeClass('invisible');
-  console.log("Search declared");
 
+  // Initialise Bloodhound for typeahead
   var ingredientsList = new Bloodhound({
     datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
     queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -403,38 +393,39 @@ $(document).on('ready', function() {
    });  
   ingredientsList.initialize();
 
+
+  // Add by ingredient view
   $('body').on('click','.by-ingre',function(){
 
-
-    
     $('.main').empty()
               .append($search);
-              console.log($search);
 
+    // Initialise typeahead
     $('#ingredient-search').typeahead(null, {
       name: 'ingredientsList',
       displayKey: 'word',
       source: ingredientsList.ttAdapter()
     });
 
+  });
 
+  // Add ingredient criteria
+  $('body').on('click','.btn-add',function(){
+    var ingre = $('#ingredient-search').val();
 
-    // $('input.tagsinput-typeahead').tagsinput('input').typeahead(null, {
-    //   name: 'ingredientsList',
-    //   displayKey: 'word',
-    //   source: ingredientsList.ttAdapter()
-    // });
+    myCabinet.addSearchItem(ingre);
 
+    var ingreLi = $('<span>')
+                  .addClass('ingre')
+                  .addClass('tag')
+                  .append(ingre + '<span class="remove">');
+
+    $('.search-criteria').append(ingreLi);
+
+    $('#ingredient-search').val("");
 
 
   });
-
-
-
-
-
-
-
 
   ////////////////
   // TOP DRINKS //
