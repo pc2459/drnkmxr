@@ -40,8 +40,8 @@ var DrnkMxr = (function(){
      */
     Drink.prototype.create = function(){
 
-      var drinkEl = $('<div>');
-      drinkEl.addClass('drink')
+      this.$drinkEl = $('<div>');
+      this.$drinkEl.addClass('drink')
               .attr('id', this.id);
 
       var ratingEl = $('<div>')
@@ -60,10 +60,17 @@ var DrnkMxr = (function(){
             .append(nameEl)
             .append(ratingEl);
 
-      drinkEl.append(row)
-              .append('<p class="instr">' + this.instructions);
+      var ingreEls = $('<ul class="ingres">')
+                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
 
-      return drinkEl;
+      var collapse = $('<div class="instr">')
+                    .append(ingreEls)
+                    .append('<p class="instr">' + this.instructions);
+
+      this.$drinkEl.append(row)
+              .append(collapse);
+
+      return this.$drinkEl;
     };
 
 
@@ -87,16 +94,74 @@ var DrnkMxr = (function(){
       var nameEl = $('<div class="col-xs-10 drink-name">')
             .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h2>' + this.name);
 
+      var ingreEls = $('<ul class="ingres">')
+                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );
+
       var row = $('<div>')
             .addClass('row')
             .addClass('drink-header')
             .append(nameEl)
             .append(ratingEl);
 
+      var collapse = $('<div class="instr collapse" id="collapse'+ this.id +'">')
+                    .append(ingreEls)
+                    .append('<p class="instr">' + this.instructions);
+
       this.$drinkEl.append(row)
-              .append('<p class="instr collapse" id="collapse'+ this.id +'">' + this.instructions);
+              .append(collapse);
 
       return this.$drinkEl;
+    };
+
+    /**
+     * Create an accordioned drink DOM element with missing ingredients indication
+     * @return {jQuery DOM el}     Drink DOM element, accordioned
+     */
+    Drink.prototype.createCollapsedMissing = function(){
+
+  
+
+      this.$drinkEl = $('<div>');
+      this.$drinkEl.addClass('drink')
+             .attr('id', this.id);
+
+      var ratingEl = $('<div>')
+              .addClass('rating')
+              .addClass('col-xs-2')
+              .append('<span class="fui-triangle-up-small up"></span>')
+              .append(this.votes)
+              .append('<span class="fui-triangle-down-small down"></span>');
+
+      var missingEl = $('<div>')
+              .addClass('missing')
+              .addClass('col-xs-1')
+              .append('<span>+' + this.missing);
+
+      var nameEl = $('<div class="col-xs-9 drink-name">')
+            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h2>' + this.name);
+
+      var row = $('<div>')
+            .addClass('row')
+            .addClass('drink-header')
+            .append(missingEl)
+            .append(nameEl)
+            .append(ratingEl);
+
+      var ingreEls = $('<ul class="ingres">')
+                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
+
+      var collapse = $('<div class="instr collapse" id="collapse'+ this.id +'">')
+                    .append(ingreEls)
+                    .append('<p class="instr">' + this.instructions);
+
+      this.$drinkEl.append(row)
+              .append(collapse);
+
+      return this.$drinkEl;
+    };
+
+    Drink.prototype.setMissing = function(missing){
+      this.missing = missing;
     };
 
 
@@ -180,7 +245,7 @@ var DrnkMxr = (function(){
         if (commonIngre.length === drink.ingredients.length) {
           matchedDrinks.push(drink);
         }
-      })
+      });
 
       matchedDrinks = _sortByVotes(matchedDrinks);
 
@@ -190,6 +255,35 @@ var DrnkMxr = (function(){
 
 
     };
+
+    Cabinet.prototype.createByMissingItems = function(){
+
+      var missedDrinks = []
+      var cabinet = this;
+
+      _.each(this.drinks, function(drink){
+        // 1. Get intersection of drink and ingredients
+        var commonIngre = _.intersection(cabinet.searchCriteria, drink.ingredients);
+        
+        // 2. Drink - intersection = missing amount
+        if (commonIngre.length < drink.ingredients.length) {
+          drink.setMissing(drink.ingredients.length - commonIngre.length)
+          missedDrinks.push(drink);
+        }
+      });
+
+      missedDrinks = _.sortBy(missedDrinks, function(drink){
+        return drink.missing;
+      })
+
+      missedDrinks = _.map(missedDrinks, function(drink){
+        return drink.createCollapsedMissing();
+      })
+
+
+      return missedDrinks;
+
+    }
 
 
     /**
@@ -449,7 +543,9 @@ $(document).on('ready', function() {
 
   });
 
+
   $alert = $('.alert').clone().removeClass('invisible');
+
   // Add ingredient criteria
   $('body').on('click','.btn-add',function(e){
     var ingre = $('#ingredient-search').val();
@@ -470,27 +566,11 @@ $(document).on('ready', function() {
       $('.search-criteria').append(ingreLi);
       $('#ingredient-search').val("");
       $('.results').empty()
-                  .append(myCabinet.createBySearchItems());
+                  .append(myCabinet.createBySearchItems())
+                  .append(myCabinet.createByMissingItems());
     }    
   });
 
-  // $('body').on('keyup','#ingredient-search', function(e){
-  //   e.preventDefault();
-  //   if (e.keyCode == 13 && $('#ingredient-search').val()){
-  //     var ingre = $('#ingredient-search').val();
-  //     myCabinet.addSearchItem(ingre);
-
-  //     var ingreLi = $('<span>')
-  //                   .addClass('ingre')
-  //                   .addClass('tag')
-  //                   .append(ingre + '<span class="remove">');
-
-  //     $('.search-criteria').append(ingreLi);
-  //     $('#ingredient-search').val("");
-  //     $('.results').empty()
-  //                 .append(myCabinet.createBySearchItems());
-  //   }
-  // })
 
   // Remove ingredient criteria
   $('body').on('click','.remove',function(){
