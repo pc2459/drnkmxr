@@ -431,7 +431,7 @@ var DrnkMxr = (function(){
                             .reverse()
                             .first(n)
                             .value();
-      console.log(allIngredients);
+      var header = $('<h5>Common Ingredients');
 
       return _.map(allIngredients, function(ingre){
         var ingreEl = $('<span>')
@@ -530,7 +530,6 @@ $(document).on('ready', function() {
    * Render mix by base "view"
    */
   $('body').on('click','.by-base', function(){
-    console.log("Clicked on by base");
     
     $('.main').empty()
               .append(myCabinet.basesView());
@@ -546,7 +545,6 @@ $(document).on('ready', function() {
   _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(),function(base){
 
     $('body').on('click','#'+base, function(){
-      console.log("This can't have worked");
 
       $('.main').empty()
                 .append(myCabinet.createByBase(base));
@@ -557,8 +555,7 @@ $(document).on('ready', function() {
   // BY INGREDIENTS //
   ////////////////////
   
-  var $search = $('.search-wrapper').clone().removeClass('invisible');
-  var $alert = $('.alert').clone().removeClass('invisible');
+
 
   // Initialise Bloodhound for typeahead
   var ingredientsList = new Bloodhound({
@@ -570,26 +567,32 @@ $(document).on('ready', function() {
   ingredientsList.initialize();
 
 
+  var $alert = $('.alert').clone().removeClass('invisible');
+
   /**
    * Build mix by ingredient "view"
    */
   $('body').on('click','.by-ingre',function(){
 
     // Reset search criteria
-    myCabinet.clearSearchItems();
-
-    $('.main').empty()
-              .append($search);
-
+    var $search = $('.search-wrapper').clone().removeClass('invisible');
     // Initialise typeahead
-    $('#ingredient-search').typeahead(null, {
+    $search.find('#ingredient-search').typeahead(null, {
       name: 'ingredientsList',
       displayKey: 'word',
       source: ingredientsList.ttAdapter()
     });
 
+    $('.main').empty()
+              .append($search);
+
+    myCabinet.clearSearchItems();
+    $('.search-criteria').empty();
+    $('.results').empty();
+
+
     // Render common ingredients
-    $('.common-tags-wrapper').empty().append(myCabinet.createCommonTags(5));
+    $('.common-tags-wrapper').empty().append('<h5>Common Ingredients').append(myCabinet.createCommonTags(5));
 
     // Adjust navigation link
     $('#by-ingre').parent().addClass('active').siblings().removeClass('active');
@@ -601,6 +604,7 @@ $(document).on('ready', function() {
    */
   $('body').on('click','.btn-add',function(e){
     var ingre = $('#ingredient-search').val();
+    console.log("IS.val():",ingre);
     e.preventDefault();
 
     // Check if ingre is in the cabinet already
@@ -609,7 +613,7 @@ $(document).on('ready', function() {
     }
     else{
       myCabinet.addSearchItem(ingre);
-
+      console.log("Search criteria:", myCabinet.searchCriteria);
       var ingreEl = $('<span>')
                     .addClass('ingre')
                     .addClass('tag')
@@ -665,7 +669,7 @@ $(document).on('ready', function() {
     ingreEl.remove();
 
     myCabinet.removeSearchItem(ingre);
-    console.log("Search criteria:", myCabinet.searchCriteria);
+    
 
     $('.results').empty()
                 .append(myCabinet.createBySearchItems())
