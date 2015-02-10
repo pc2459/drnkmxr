@@ -271,9 +271,7 @@ var DrnkMxr = (function(){
         return drink.base === base;
       });
 
-      baseDrinks = _.sortBy(baseDrinks, function(drink){
-        return -(drink.votes);
-      });
+      baseDrinks = _sortByVotes(baseDrinks);
 
       var featured = _.first(baseDrinks).create();
       var remainder =  _.map(_.rest(baseDrinks), function(drink){
@@ -451,29 +449,48 @@ $(document).on('ready', function() {
 
   });
 
+  $alert = $('.alert').clone().removeClass('invisible');
   // Add ingredient criteria
-  $('body').on('click','.btn-add',function(){
+  $('body').on('click','.btn-add',function(e){
     var ingre = $('#ingredient-search').val();
+    e.preventDefault();
 
-    myCabinet.addSearchItem(ingre);
+    // Check if ingre is in the cabinet already
+    if (_.contains(myCabinet.searchCriteria,ingre)){
+      $('.warnings').append($alert);
+    }
+    else{
+      myCabinet.addSearchItem(ingre);
 
-    var ingreLi = $('<span>')
-                  .addClass('ingre')
-                  .addClass('tag')
-                  .append(ingre + '<span class="remove">');
+      var ingreLi = $('<span>')
+                    .addClass('ingre')
+                    .addClass('tag')
+                    .append(ingre + '<span class="remove">');
 
-    $('.search-criteria').append(ingreLi);
-
-    $('#ingredient-search').val("");
-    console.log("Search criteria:", myCabinet.searchCriteria);
-
-    $('.results').empty()
-                .append(myCabinet.createBySearchItems());
-
-    console.log(myCabinet.createBySearchItems());
-                
-
+      $('.search-criteria').append(ingreLi);
+      $('#ingredient-search').val("");
+      $('.results').empty()
+                  .append(myCabinet.createBySearchItems());
+    }    
   });
+
+  // $('body').on('keyup','#ingredient-search', function(e){
+  //   e.preventDefault();
+  //   if (e.keyCode == 13 && $('#ingredient-search').val()){
+  //     var ingre = $('#ingredient-search').val();
+  //     myCabinet.addSearchItem(ingre);
+
+  //     var ingreLi = $('<span>')
+  //                   .addClass('ingre')
+  //                   .addClass('tag')
+  //                   .append(ingre + '<span class="remove">');
+
+  //     $('.search-criteria').append(ingreLi);
+  //     $('#ingredient-search').val("");
+  //     $('.results').empty()
+  //                 .append(myCabinet.createBySearchItems());
+  //   }
+  // })
 
   // Remove ingredient criteria
   $('body').on('click','.remove',function(){

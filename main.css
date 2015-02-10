@@ -81,6 +81,13 @@ body {
   margin: 20px 0;
 }
 
+.ingre-alert {
+
+  margin-top: 10px;
+  font-size: 12px;
+  margin-left: 15px;
+}
+
 
 /* TAGS */
 
@@ -141,5 +148,11 @@ body {
 .remove:hover {
           filter: none;
   opacity: 1;
+}
+
+/* RESULTS */
+
+.results-wrapper {
+  padding-left: 20px;
 }
 
