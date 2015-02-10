@@ -49,11 +49,11 @@ html {
 }
 
 .missing > span {
-  line-height: 103px;
+  line-height: 61px;
 }
 
 .rating{
-  margin-top: 30px;
+  margin-top: 15px;
   text-align: center;
 }
 
@@ -155,4 +155,6 @@ html {
 .results-wrapper {
   padding-left: 20px;
 }
+
+
 

@@ -48,11 +48,11 @@ var DrnkMxr = (function(){
               .addClass('rating')
               .addClass('col-xs-2')
               .append('<span class="fui-triangle-up-small up"></span>')
-              .append(this.votes)
+              .append('<span class="votes">' + this.votes)
               .append('<span class="fui-triangle-down-small down"></span>');
 
       var nameEl = $('<div class="col-xs-10 drink-name">')
-            .append('<h2>' + this.name);
+            .append('<h4>' + this.name);
 
       var row = $('<div>')
             .addClass('row')
@@ -88,11 +88,11 @@ var DrnkMxr = (function(){
               .addClass('rating')
               .addClass('col-xs-2')
               .append('<span class="fui-triangle-up-small up"></span>')
-              .append(this.votes)
+              .append('<span class="votes">' + this.votes)
               .append('<span class="fui-triangle-down-small down"></span>');
 
       var nameEl = $('<div class="col-xs-10 drink-name">')
-            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h2>' + this.name);
+            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
 
       var ingreEls = $('<ul class="ingres">')
                   .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );
@@ -129,7 +129,7 @@ var DrnkMxr = (function(){
               .addClass('rating')
               .addClass('col-xs-2')
               .append('<span class="fui-triangle-up-small up"></span>')
-              .append(this.votes)
+              .append('<span class="votes">' + this.votes)
               .append('<span class="fui-triangle-down-small down"></span>');
 
       var missingEl = $('<div>')
@@ -138,7 +138,7 @@ var DrnkMxr = (function(){
               .append('<span>+' + this.missing);
 
       var nameEl = $('<div class="col-xs-9 drink-name">')
-            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h2>' + this.name);
+            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
 
       var row = $('<div>')
             .addClass('row')
@@ -150,7 +150,7 @@ var DrnkMxr = (function(){
       var ingreEls = $('<ul class="ingres">')
                   .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
 
-      var collapse = $('<div class="instr collapse" id="collapse'+ this.id +'">')
+      var collapse = $('<div class="instr collapse col-xs-offset-1" id="collapse'+ this.id +'">')
                     .append(ingreEls)
                     .append('<p class="instr">' + this.instructions);
 
@@ -172,7 +172,7 @@ var DrnkMxr = (function(){
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
-      this.$drinkEl = this.createCollapsed();
+      
     };
 
     return Drink;
@@ -272,6 +272,7 @@ var DrnkMxr = (function(){
         }
       });
 
+      missedDrinks = _sortByVotes(missedDrinks);
       missedDrinks = _.sortBy(missedDrinks, function(drink){
         return drink.missing;
       })
@@ -441,7 +442,7 @@ $(document).on('ready', function() {
   
   $('body').on('click','.up', function(){
     var drinkID = $(this).closest('.drink').attr('id');
-    var drinkEl = $(this).closest('.drink');
+    var votesEl = $(this).siblings('.votes');
     var drink = _.find(myCabinet.drinks, function(drink){
       return drink.id === drinkID;
     });
@@ -450,13 +451,13 @@ $(document).on('ready', function() {
     drink.rate(1);
 
     //Update the DOM element
-    drinkEl.empty().append(drink.$drinkEl);
+    votesEl.html(drink.votes);
 
   });
 
   $('body').on('click','.down', function(){
     var drinkID = $(this).closest('.drink').attr('id');
-    var drinkEl = $(this).closest('.drink');
+    var votesEl = $(this).siblings('.votes');
     var drink = _.find(myCabinet.drinks, function(drink){
       return drink.id === drinkID;
     });
@@ -465,7 +466,7 @@ $(document).on('ready', function() {
     drink.rate(-1);
 
     //Update the DOM element
-    drinkEl.empty().append(drink.$drinkEl);
+    votesEl.html(drink.votes);
 
   });
 
@@ -540,6 +541,9 @@ $(document).on('ready', function() {
       displayKey: 'word',
       source: ingredientsList.ttAdapter()
     });
+
+    // Adjust navigation link
+    $('#by-ingre').parent().addClass('active').siblings().removeClass('active');
 
   });
 
