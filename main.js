@@ -163,6 +163,34 @@ var DrnkMxr = (function(){
       this.searchCriteria = [];
     };
 
+    Cabinet.prototype.createBySearchItems = function(){
+
+      // Filter down to a list of drinks whose ingredients list is a subset of the 
+      // search criteria
+      
+      var matchedDrinks = [];
+      var cabinet = this;
+      
+      _.each(this.drinks, function(drink){
+
+        // 1. Get intersection of the two arrays
+        var commonIngre = _.intersection(cabinet.searchCriteria, drink.ingredients);
+        // 2. If the common ingredients are the same length as the drink,
+        // then the drink is a subset
+        if (commonIngre.length === drink.ingredients.length) {
+          matchedDrinks.push(drink);
+        }
+      })
+
+      matchedDrinks = _sortByVotes(matchedDrinks);
+
+      return _.map(matchedDrinks,function(drink){
+        return drink.createCollapsed();
+      })      
+
+
+    };
+
 
     /**
      * Cabinet toString method
@@ -257,6 +285,8 @@ var DrnkMxr = (function(){
 
     };
 
+
+
     Cabinet.prototype.featureFirst = function(){
       return _.first(this.drinks).create();
     };
@@ -281,6 +311,12 @@ var DrnkMxr = (function(){
     Cabinet.prototype.getIngredients = function(){
       return _.chain(this.drinks).pluck("ingredients").flatten().uniq().value();
     };
+
+    var _sortByVotes = function(array){
+      return _.sortBy(array, function(drink){
+        return -(drink.votes);
+      })
+    }
 
     return Cabinet;
 
@@ -400,7 +436,7 @@ $(document).on('ready', function() {
   ingredientsList.initialize();
 
 
-  // Add by ingredient view
+  // Mix by ingredient view
   $('body').on('click','.by-ingre',function(){
 
     $('.main').empty()
@@ -431,13 +467,18 @@ $(document).on('ready', function() {
     $('#ingredient-search').val("");
     console.log("Search criteria:", myCabinet.searchCriteria);
 
+    $('.results').empty()
+                .append(myCabinet.createBySearchItems());
+
+    console.log(myCabinet.createBySearchItems());
+                
+
   });
 
   // Remove ingredient criteria
   $('body').on('click','.remove',function(){
     var ingre = $(this).closest('.ingre').text();
     var ingreEl = $(this).closest('.tag');
-    console.log(ingre);
 
     ingreEl.remove();
 
