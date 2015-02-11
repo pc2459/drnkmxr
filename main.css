@@ -12,6 +12,14 @@ html {
   margin-top: 20px;
 }
 
+/* Vertical lignment hack */
+@media (max-width: 992px){
+  .navbar-nav > li > a {
+    line-height: 41px;
+  }
+  
+}
+
 .jumbotron{
   background-color: transparent;
 }
@@ -35,6 +43,7 @@ html {
 .btn-circle:hover;{
   color: #F1C40F;
 }
+
 
 
 /* DRINK ELEMENTS */
@@ -188,6 +197,7 @@ html {
 .results-wrapper {
   padding-left: 20px;
 }
+
 
 
 

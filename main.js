@@ -500,7 +500,6 @@ $(document).on('ready', function() {
    */
   $('body').on('click','.btn-add',function(e){
     var ingre = $('#ingredient-search').val();
-    console.log("IS.val():",ingre);
     e.preventDefault();
 
     // Check if ingre is in the cabinet already
@@ -600,6 +599,40 @@ $(document).on('ready', function() {
     $('#add-drink').parent().addClass('active').siblings().removeClass('active');
   });
 
+  ///////////
+  // LOGIN //
+  ///////////
+  
+  $('body').on('click','.log-in',function(){
+    drinksFB.authWithOAuthPopup("twitter", function(error, authData) {
+      if (error) {
+        console.log("Login Failed!", error);
+        if (error.code === "TRANSPORT_UNAVAILABLE") {
+          drinksFB.authWithOAuthRedirect("twitter", function(error, authData){
+            if (error){
+              console.log("Login Failed Again!", error);
+            }
+
+          })
+        }
+      } else {
+        console.log("Authenticated successfully with payload:", authData);
+      }
+    });
+
+    //Set user up in database
+    drinksFB.onAuth(function(authData){
+      if(authData) {
+        drinksFB.child("users").child(authData.uid).set({
+          name : authData.twitter.displayName
+        })
+      }      
+    });
+    
+
+
+
+  })
 
 
 }); // ./document onready
