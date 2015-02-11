@@ -1,4 +1,5 @@
 var drinksFB = new Firebase("https://shining-fire-3793.firebaseio.com/drinks");
+var usersFB = new Firebase("https://shining-fire-3793.firebaseio.com/users")
 
 var DrnkMxr = (function(){
 
@@ -348,6 +349,30 @@ var DrnkMxr = (function(){
     return Cabinet;
   })(); //end Cabinet
 
+  ////////////////
+  // USER CLASS //
+  ////////////////
+
+  var User = (function(){
+    var User = function(id, name, addedDrinks, voted, favourites){
+      this.id = id;
+      this.name = name;
+      this.addedDrinks = addedDrinks || [];
+      this.voted = voted || [];
+      this.favourites = favourites || [];
+    };
+
+  User.prototype.storeUpvote = function(drinkID){
+    this.favourites.push(drinkID);
+  };
+
+  User.prototype.storeVote = function(drinkID){
+    this.voted.push(drinkID);
+  };
+
+    return User;
+  })();
+
   /////////////////////////////////
   // Return all the constructors //
   /////////////////////////////////
@@ -355,6 +380,7 @@ var DrnkMxr = (function(){
   var DrnkMxr = {
     Drink   : Drink,
     Cabinet : Cabinet,
+    User    : User
   };
 
   return DrnkMxr;
@@ -362,6 +388,7 @@ var DrnkMxr = (function(){
 
 var myCabinet = new DrnkMxr.Cabinet();
 myCabinet.autoFBLoad();
+var myUser = new DrnkMxr.User(0,"Anonymous");
 
 $(document).on('ready', function() {
 
@@ -369,32 +396,57 @@ $(document).on('ready', function() {
   // RATING SYSTEM //
   ///////////////////
   
-  $('body').on('click','.up', function(){
-    var drinkID = $(this).closest('.drink').attr('id');
-    var votesEl = $(this).siblings('.votes');
-    var drink = _.find(myCabinet.drinks, function(drink){
-      return drink.id === drinkID;
-    });
-    
-    //Rate the drink
-    drink.rate(1);
+  var rateDrink = function(delta, thatEl){
+    var authData = usersFB.getAuth();
+    console.log(authData);
 
-    //Update the DOM element
-    votesEl.html(drink.votes);
+    var drinkID = thatEl.closest('.drink').attr('id');
+    // Check to see if user is logged in
+    if(authData && !_.contains(myUser.voted, drinkID)){
+      
+      var votesEl = thatEl.siblings('.votes');
+      var drink = _.find(myCabinet.drinks, function(drink){
+        return drink.id === drinkID;
+      });
+
+      //Add the drink to the user's voted array
+      myUser.storeVote(drinkID);
+      usersFB.child(myUser.id).update({ "voted" : this.voted });
+
+      if (delta === 1){
+        // Add to user's favourites
+        myUser.storeUpvote(drinkID);
+        usersFB.child(myUser.id).update({ "favourited" : this.favourites });
+      }
+      
+      //Rate the drink
+      drink.rate(delta);
+
+      //Update the DOM element
+      votesEl.html(drink.votes);
+    }
+    else if (authData && _.contains(myUser.voted, drinkID)){
+      $('.main').prepend('<div class="alert alert-warning alert-dismissible" role="alert">Stop stuffing ballots! <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+    }
+    else {
+      $('.main').prepend('<div class="alert alert-warning alert-dismissible" role="alert">Sorry! You need to be logged in to vote! <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+    }
+
+    console.log("Voted:",myUser.voted);
+    console.log("Liked:",myUser.favourites);
+
+  };
+  
+  
+  $('body').on('click','.up', function(){
+    rateDrink(1, $(this));
+
+    
+
   });
 
   $('body').on('click','.down', function(){
-    var drinkID = $(this).closest('.drink').attr('id');
-    var votesEl = $(this).siblings('.votes');
-    var drink = _.find(myCabinet.drinks, function(drink){
-      return drink.id === drinkID;
-    });
-    
-    //Rate the drink
-    drink.rate(-1);
-
-    //Update the DOM element
-    votesEl.html(drink.votes);
+    rateDrink(-1, $(this));
   });
 
   //////////
@@ -604,11 +656,18 @@ $(document).on('ready', function() {
   ///////////
   
   $('body').on('click','.log-in',function(){
-    drinksFB.authWithOAuthPopup("twitter", function(error, authData) {
+
+    var checkIfUserExists = function(userID){
+
+    }
+      
+      
+    // Twitter login
+    usersFB.authWithOAuthPopup("twitter", function(error, authData) {
       if (error) {
         console.log("Login Failed!", error);
         if (error.code === "TRANSPORT_UNAVAILABLE") {
-          drinksFB.authWithOAuthRedirect("twitter", function(error, authData){
+          usersFB.authWithOAuthRedirect("twitter", function(error, authData){
             if (error){
               console.log("Login Failed Again!", error);
             }
@@ -620,19 +679,48 @@ $(document).on('ready', function() {
       }
     });
 
+
+
     //Set user up in database
-    drinksFB.onAuth(function(authData){
+    usersFB.onAuth(function(authData){
+
       if(authData) {
-        drinksFB.child("users").child(authData.uid).set({
-          name : authData.twitter.displayName
-        })
+        // Check if the user already exists...        
+        usersFB.child(authData.uid).once("value",function(user){
+          console.log(user.key());
+          // If not...
+          if (!user.val()){
+            console.log("Loading up new user");
+            // Store on FB
+            usersFB.child(authData.uid).set({
+              name : authData.twitter.displayName
+            })
+
+            // Store locally for use
+            myUser = new DrnkMxr.User(authData.uid, authData.twitter.displayName);
+          }
+          // If they do...
+          else{
+            // Load 'em up
+            console.log("Loading up old user");
+            myUser = new DrnkMxr.User(user.key(),
+                                      user.val().name,
+                                      user.val().addedDrinks,
+                                      user.val().voted,
+                                      user.val().favourites);
+          }
+        });        
       }      
+
     });
-    
+
+
 
 
 
   })
 
+
+  
 
 }); // ./document onready
