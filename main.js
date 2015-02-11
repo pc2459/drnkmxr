@@ -27,8 +27,6 @@ var DrnkMxr = (function(){
       
     };
 
-
-
     /**
      * Return string describing name and base of a drink
      */
@@ -358,10 +356,7 @@ var DrnkMxr = (function(){
                                 snapshot.val().instructions, 
                                 snapshot.val().votes, 
                                 snapshot.key());
-        
       })
-
-
     };
 
     /**
@@ -565,8 +560,6 @@ $(document).on('ready', function() {
 
     // Adjust navigation link
     $('#by-base').parent().addClass('active').siblings().removeClass('active');
-
-
   });
 
   /**
@@ -590,9 +583,6 @@ $(document).on('ready', function() {
   //               .append(myCabinet.createByBase(base));
   //   });
   // });    
-
-
-
 
   /////////////////////
   // BY INGREDIENTS //
@@ -713,7 +703,6 @@ $(document).on('ready', function() {
 
     myCabinet.removeSearchItem(ingre);
     
-
     $('.results').empty()
                 .append(myCabinet.createBySearchItems())
                 .append(myCabinet.createByMissingItems());
@@ -737,4 +726,17 @@ $(document).on('ready', function() {
     // Adjust navigation link
     $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
   });
-});
+
+  /////////////////
+  // ADD A DRINK //
+  /////////////////
+  
+  $('body').on('click','.add-drink',function(){
+
+    // Adjust navigation link
+    $('#add-drink').parent().addClass('active').siblings().removeClass('active');
+  });
+
+
+
+}); // ./document onready
