@@ -28,14 +28,6 @@ var DrnkMxr = (function(){
     };
 
     /**
-     * Return string describing name and base of a drink
-     */
-    Drink.prototype.toString = function(){
-
-      return this.name + " (" + this.base + ")";
-    };
-
-    /**
      * Create a drink DOM element, without accordioning.
      * @return {jQuery DOM el}      Drink DOM element
      */
@@ -86,21 +78,12 @@ var DrnkMxr = (function(){
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
-      drinksFB.child(this.id).update({ "votes" : this.votes }, function(error){
-        if (error) {
-          console.log("Something went wrong");
-        }
-        else {
-          console.log("All went well");
-        }
-      });
-      
+      drinksFB.child(this.id).update({ "votes" : this.votes });      
     };
 
     return Drink;
 
   })(); //end Drink
-
 
   ///////////////////
   // CABINET CLASS //
@@ -113,9 +96,7 @@ var DrnkMxr = (function(){
      */
     var Cabinet = function(){      
       this.drinks = [];
-      this.ingredients = [];
       this.searchCriteria = [];
-
     };
 
     /**
@@ -131,9 +112,6 @@ var DrnkMxr = (function(){
       // Add drink to the cabinet
       var newDrink = new Drink(name, base, ingredients, instructions, votes, id);
       this.drinks.push(newDrink);
-
-      // Update the master list of ingredients
-      _.union(this.ingredients, ingredients);
     };
 
     /**
@@ -221,15 +199,6 @@ var DrnkMxr = (function(){
       })
 
       return missedDrinks;
-    };
-
-
-    /**
-     * Cabinet toString method
-     * @return {string}               List of drinks with their bases
-     */
-    Cabinet.prototype.toString = function(){
-      return  _.map(this.drinks, function(drink){ return drink.toString(); }).join("\n");
     };
 
     /**
@@ -377,7 +346,6 @@ var DrnkMxr = (function(){
     }
 
     return Cabinet;
-
   })(); //end Cabinet
 
   /////////////////////////////////
@@ -387,7 +355,6 @@ var DrnkMxr = (function(){
   var DrnkMxr = {
     Drink   : Drink,
     Cabinet : Cabinet,
-    
   };
 
   return DrnkMxr;
@@ -475,9 +442,6 @@ $(document).on('ready', function() {
 
 
   // _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(), function(base){
-
-  //   console.log("???");
-
   //   $('body').on('click', '#'+base, function(){
 
   //     $('.main').empty()
@@ -496,7 +460,6 @@ $(document).on('ready', function() {
    * Build mix by ingredient "view"
    */
   $('body').on('click','.by-ingre',function(){
-
 
     // Initialise Bloodhound for typeahead
     var ingredientsList = new Bloodhound({
@@ -519,11 +482,10 @@ $(document).on('ready', function() {
     $('.main').empty()
               .append($search);
 
-
+    // Reset search criteria if users double-click on By Ingredients
     myCabinet.clearSearchItems();
     $('.search-criteria').empty();
     $('.results').empty();
-
 
     // Render common ingredients
     $('.common-tags-wrapper').empty().append(myCabinet.createCommonTags(5));

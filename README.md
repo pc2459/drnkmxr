@@ -6,3 +6,4 @@ Midterm project for RefactorU. An app to help you find drinks to mix, whether by
 
 + Uses FlatUI, a flat theme for Bootstrap
 + Uses Firebase for real-time database goodness
++ Uses Handlebars to template out HTML
