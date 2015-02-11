@@ -40,76 +40,23 @@ var DrnkMxr = (function(){
      * @return {jQuery DOM el}      Drink DOM element
      */
     Drink.prototype.create = function(){
-
-      this.$drinkEl = $('<div>');
-      this.$drinkEl.addClass('drink')
-              .attr('id', this.id);
-
-      var ratingEl = $('<div>')
-              .addClass('rating')
-              .addClass('col-xs-2')
-              .append('<span class="fui-triangle-up-small up"></span>')
-              .append('<span class="votes">' + this.votes)
-              .append('<span class="fui-triangle-down-small down"></span>');
-
-      var nameEl = $('<div class="col-xs-10 drink-name">')
-            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
-
-      var row = $('<div>')
-            .addClass('row')
-            .addClass('drink-header')
-            .append(nameEl)
-            .append(ratingEl);
-
-      var ingreEls = $('<ul class="ingres">')
-                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
-
-      var collapse = $('<div class="instr collapse in" id="collapse'+ this.id +'">')
-                    .append(ingreEls)
-                    .append('<p class="instr">' + this.instructions);
-
-      this.$drinkEl.append(row)
-              .append(collapse);
+               
+      var source = $('#drinks-template').html();
+      var template = Handlebars.compile(source);
+      this.$drinkEl = $(template(this));
 
       return this.$drinkEl;
     };
-
 
     /**
      * Create an accordioned drink DOM element
      * @return {jQuery DOM el}     Drink DOM element, accordioned
      */
     Drink.prototype.createCollapsed = function(){
-
-      this.$drinkEl = $('<div>');
-      this.$drinkEl.addClass('drink')
-             .attr('id', this.id);
-
-      var ratingEl = $('<div>')
-              .addClass('rating')
-              .addClass('col-xs-2')
-              .append('<span class="fui-triangle-up-small up"></span>')
-              .append('<span class="votes">' + this.votes)
-              .append('<span class="fui-triangle-down-small down"></span>');
-
-      var nameEl = $('<div class="col-xs-10 drink-name">')
-            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
-
-      var ingreEls = $('<ul class="ingres">')
-                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );
-
-      var row = $('<div>')
-            .addClass('row')
-            .addClass('drink-header')
-            .append(nameEl)
-            .append(ratingEl);
-
-      var collapse = $('<div class="instr collapse" id="collapse'+ this.id +'">')
-                    .append(ingreEls)
-                    .append('<p class="instr">' + this.instructions);
-
-      this.$drinkEl.append(row)
-              .append(collapse);
+      
+      var source = $('#drinksCollapsed-template').html();
+      var template = Handlebars.compile(source);
+      this.$drinkEl = $(template(this));
 
       return this.$drinkEl;
     };
@@ -119,43 +66,11 @@ var DrnkMxr = (function(){
      * @return {jQuery DOM el}     Drink DOM element, accordioned
      */
     Drink.prototype.createCollapsedMissing = function(){
-
-      this.$drinkEl = $('<div>');
-      this.$drinkEl.addClass('drink')
-             .attr('id', this.id);
-
-      var ratingEl = $('<div>')
-              .addClass('rating')
-              .addClass('col-xs-2')
-              .append('<span class="fui-triangle-up-small up"></span>')
-              .append('<span class="votes">' + this.votes)
-              .append('<span class="fui-triangle-down-small down"></span>');
-
-      var missingEl = $('<div>')
-              .addClass('missing')
-              .addClass('col-xs-1')
-              .append('<span>+' + this.missing);
-
-      var nameEl = $('<div class="col-xs-9 drink-name">')
-            .append('<a data-toggle="collapse" href="#collapse'+ this.id +'"><h4>' + this.name);
-
-      var row = $('<div>')
-            .addClass('row')
-            .addClass('drink-header')
-            .append(missingEl)
-            .append(nameEl)
-            .append(ratingEl);
-
-      var ingreEls = $('<ul class="ingres">')
-                  .append(_.map(this.ingredients, function(ingre){ return '<li>' + ingre; }) );      
-
-      var collapse = $('<div class="instr collapse col-xs-offset-1" id="collapse'+ this.id +'">')
-                    .append(ingreEls)
-                    .append('<p class="instr">' + this.instructions);
-
-      this.$drinkEl.append(row)
-              .append(collapse);
-
+        
+      var source = $('#drinksCollapsedMissing-template').html();
+      var template = Handlebars.compile(source);
+      this.$drinkEl = $(template(this));        
+      
       return this.$drinkEl;
     };
 

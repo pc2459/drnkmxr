@@ -126,6 +126,119 @@
  </div> <!-- /.row -->
 
 
+<!-- Handlebar Templates -->
+ <!-- Drink  -->
+<script id="drinks-template" type="text/x-handlebars-template">
+  
+  <div class="drink" id="{{id}}">
+    
+    <div class="row drink-header">
+      
+      <div class="col-xs-10 drink-name">
+        <a data-toggle="collapse" href="#collapse{{id}}">
+          <h4>{{name}}</h4>
+        </a>
+      </div>
+      
+      <div class="col-xs-2 rating">
+        <span class="fui-triangle-up-small up"></span>
+        <span class="votes">{{votes}}</span>
+        <span class="fui-triangle-down-small down"></span>
+      </div>
+    
+    </div>
+
+    <div class="instr collapse in" id="collapse{{id}}">
+
+      <ul class="ingres">
+        {{#each ingredients}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+
+      <p class="instr">{{instructions}}</p>
+      
+    </div>
+  </div>
+</script>
+
+   <!-- Drink collapsed -->
+<script id="drinksCollapsed-template" type="text/x-handlebars-template">
+  
+  <div class="drink" id="{{id}}">
+    
+    <div class="row drink-header">
+      
+      <div class="col-xs-10 drink-name">
+        <a data-toggle="collapse" href="#collapse{{id}}">
+          <h4>{{name}}</h4>
+        </a>
+      </div>
+      
+      <div class="col-xs-2 rating">
+        <span class="fui-triangle-up-small up"></span>
+        <span class="votes">{{votes}}</span>
+        <span class="fui-triangle-down-small down"></span>
+      </div>
+    
+    </div>
+
+    <div class="instr collapse" id="collapse{{id}}">
+
+      <ul class="ingres">
+        {{#each ingredients}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+
+      <p class="instr">{{instructions}}</p>
+      
+    </div>
+  </div>
+</script>
+
+
+   <!-- Drink with missing elements collapsed  -->
+<script id="drinksCollapsedMissing-template" type="text/x-handlebars-template">
+  
+  <div class="drink" id="{{id}}">
+    
+    <div class="row drink-header">
+
+      <div class="col-xs-1 missing">
+        <span>{{missing}}</span>
+      </div>
+      
+      <div class="col-xs-9 drink-name">
+        <a data-toggle="collapse" href="#collapse{{id}}">
+          <h4>{{name}}</h4>
+        </a>
+      </div>
+      
+      <div class="col-xs-2 rating">
+        <span class="fui-triangle-up-small up"></span>
+        <span class="votes">{{votes}}</span>
+        <span class="fui-triangle-down-small down"></span>
+      </div>
+    
+    </div>
+
+    <div class="instr collapse " id="collapse{{id}}">
+
+      <ul class="ingres">
+        {{#each ingredients}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+
+      <p class="instr">{{instructions}}</p>
+      
+    </div>
+  </div>
+</script>
+
+
+
 
 
 
@@ -138,6 +251,7 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.10.4/typeahead.bundle.min.js"></script>
+    <script src="handlebars/handlebars-v2.0.0.js"></script>
     <script src="flatui/dist/js/flat-ui.js"></script>
     <script src="drinks.js"></script>
     <script src="main.js"></script>
