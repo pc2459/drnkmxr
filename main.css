@@ -21,7 +21,6 @@ html {
   margin: 40px 0;
 }
 
-
 .btn-circle{
   display: block;
   width: 200px;
@@ -75,6 +74,7 @@ html {
 .form-inline .form-control {
   width: 100%;
 }
+
 
 
 .search-criteria-wrapper{

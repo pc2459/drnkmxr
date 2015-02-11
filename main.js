@@ -281,26 +281,18 @@ var DrnkMxr = (function(){
     Cabinet.prototype.basesView = function(){
       // Get array of unique bases from all the drinks in the cabinet
       var allBases = _.pluck(this.drinks, "base");
-
       var uniqueBases = _.uniq(allBases);
-
       var countedBases = _.countBy(allBases);
 
-      return _.map(uniqueBases,function(base){
-          //for each base...
-          var wrapper = $('<div>')
-                .addClass('option')
-                .addClass('col-sm-6');
-          var inner = $('<a href="#" id="'+ base +'">')
-                .addClass('btn-circle')
-                .addClass('base')
-                .attr('data-name', base)
-                .append(base)
-                .append(' (' + countedBases[base] + ')');
+      var context = { uniqueBases : uniqueBases, countedBases : countedBases };
 
-          return wrapper.append(inner);
-
+      Handlebars.registerHelper('lookup', function(obj, field) {
+        return obj[field];
       });
+
+      var source = $('#basesView-template').html();
+      var template = Handlebars.compile(source);
+      return $(template(context));
     };
 
     /**
@@ -371,16 +363,10 @@ var DrnkMxr = (function(){
                             .reverse()
                             .first(n)
                             .value();
-      var header = $('<h5>Common Ingredients');
-
-      return _.map(allIngredients, function(ingre){
-        var ingreEl = $('<span>')
-              .addClass('common-ingre')
-              .addClass('tag')
-              .append('<span class="ingre-name">' + ingre[0] + '</span>' + ' (' + ingre[1] + ')' + '<span class="add">');
-        return ingreEl;
-      })
-
+      var context = { allIngredients : allIngredients };
+      var source = $('#commonTags-template').html();
+      var template = Handlebars.compile(source);
+      return $(template(context));
     };
 
     // Helper function to sort drink arrays by votes
@@ -540,7 +526,7 @@ $(document).on('ready', function() {
 
 
     // Render common ingredients
-    $('.common-tags-wrapper').empty().append('<h5>Common Ingredients').append(myCabinet.createCommonTags(5));
+    $('.common-tags-wrapper').empty().append(myCabinet.createCommonTags(5));
 
     // Adjust navigation link
     $('#by-ingre').parent().addClass('active').siblings().removeClass('active');

@@ -127,7 +127,7 @@
 
 
 <!-- Handlebar Templates -->
- <!-- Drink  -->
+  <!-- Drink  -->
 <script id="drinks-template" type="text/x-handlebars-template">
   
   <div class="drink" id="{{id}}">
@@ -162,7 +162,7 @@
   </div>
 </script>
 
-   <!-- Drink collapsed -->
+  <!-- Drink collapsed -->
 <script id="drinksCollapsed-template" type="text/x-handlebars-template">
   
   <div class="drink" id="{{id}}">
@@ -198,7 +198,7 @@
 </script>
 
 
-   <!-- Drink with missing elements collapsed  -->
+  <!-- Drink with missing elements collapsed  -->
 <script id="drinksCollapsedMissing-template" type="text/x-handlebars-template">
   
   <div class="drink" id="{{id}}">
@@ -237,6 +237,26 @@
   </div>
 </script>
 
+  <!-- Bases "view"  -->
+<script id="basesView-template" type="text/x-handlebars-template">
+  {{#each uniqueBases}}
+  <div class="col-sm-6 option">
+    <a href="#" id="{{this}}" class="btn-circle base" data-name="{{this}}">{{this}} ({{lookup ../countedBases this}})</a>
+  </div>  
+  {{/each}}
+</script>
+
+  <!-- Create common tags  -->
+<script id="commonTags-template" type="text/x-handlebars-template">
+  <h5>Common Ingredients</h5>
+  {{#each allIngredients}}
+  <span class="common-ingre tag">
+    <span class="ingre-name">{{this.[0]}}</span>
+    <span>({{this.[1]}})</span>
+    <span class="add"></span>
+  </span>
+  {{/each}}
+</script>
 
 
 
