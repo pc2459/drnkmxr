@@ -1,5 +1,4 @@
 var drinksFB = new Firebase("https://shining-fire-3793.firebaseio.com/drinks");
-console.log(drinksFB);
 
 var DrnkMxr = (function(){
 
@@ -24,20 +23,7 @@ var DrnkMxr = (function(){
       this.ingredients = ingredients;
       this.instructions = instructions;
       this.votes = votes || 0;
-      console.log("THE ID:", id);
       this.id = id;
-      console.log("This drink's ID:", this.id);
-
-      // // Push to the database
-      // var newFBdrink = drinksFB.push( {
-      //       name          : this.name,
-      //       base          : this.base,
-      //       ingredients   : this.ingredients,
-      //       instructions  : this.instructions,
-      //       votes         : this.votes
-      //   }
-      // );
-
       
     };
 
@@ -187,7 +173,6 @@ var DrnkMxr = (function(){
     Drink.prototype.rate = function(delta){
       
       this.votes += Number(delta);
-      console.log(this);
       drinksFB.child(this.id).update({ "votes" : this.votes }, function(error){
         if (error) {
           console.log("Something went wrong");
@@ -367,7 +352,6 @@ var DrnkMxr = (function(){
     Cabinet.prototype.autoFBLoad = function(){
       var cabinet = this;
       drinksFB.on("child_added", function(snapshot){
-        console.log(typeof snapshot.key());
         return cabinet.addDrink(snapshot.val().name, 
                                 snapshot.val().base, 
                                 snapshot.val().ingredients, 
@@ -377,7 +361,6 @@ var DrnkMxr = (function(){
         
       })
 
-      console.log()
 
     };
 
@@ -400,6 +383,8 @@ var DrnkMxr = (function(){
                 .addClass('col-sm-6');
           var inner = $('<a href="#" id="'+ base +'">')
                 .addClass('btn-circle')
+                .addClass('base')
+                .attr('data-name', base)
                 .append(base)
                 .append(' (' + countedBases[base] + ')');
 
@@ -510,12 +495,10 @@ var DrnkMxr = (function(){
   };
 
   return DrnkMxr;
-
 })();
 
 var myCabinet = new DrnkMxr.Cabinet();
 myCabinet.autoFBLoad();
-
 
 $(document).on('ready', function() {
 
@@ -575,26 +558,41 @@ $(document).on('ready', function() {
    * Render mix by base "view"
    */
   $('body').on('click','.by-base', function(){
+
     
     $('.main').empty()
               .append(myCabinet.basesView());
 
     // Adjust navigation link
     $('#by-base').parent().addClass('active').siblings().removeClass('active');
-  });
 
+
+  });
 
   /**
    * Render drinks by base
    */
-  _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(),function(base){
-
-    $('body').on('click','#'+base, function(){
-
+  
+    $('body').on('click','.base',function(){
+      var base = $(this).attr('data-name');
       $('.main').empty()
                 .append(myCabinet.createByBase(base));
-    });
-  });    
+    })
+
+
+  // _.each(_.chain(myCabinet.drinks).pluck("base").uniq().value(), function(base){
+
+  //   console.log("???");
+
+  //   $('body').on('click', '#'+base, function(){
+
+  //     $('.main').empty()
+  //               .append(myCabinet.createByBase(base));
+  //   });
+  // });    
+
+
+
 
   /////////////////////
   // BY INGREDIENTS //
