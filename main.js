@@ -599,17 +599,6 @@ $(document).on('ready', function() {
   ////////////////////
   
 
-
-  // Initialise Bloodhound for typeahead
-  var ingredientsList = new Bloodhound({
-    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
-    queryTokenizer: Bloodhound.tokenizers.whitespace,
-    limit: 4,
-    local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
-   });  
-  ingredientsList.initialize();
-
-
   var $alert = $('.alert').clone().removeClass('invisible');
 
   /**
@@ -617,8 +606,18 @@ $(document).on('ready', function() {
    */
   $('body').on('click','.by-ingre',function(){
 
+
+    // Initialise Bloodhound for typeahead
+    var ingredientsList = new Bloodhound({
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      limit: 4,
+      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
+     });  
+    ingredientsList.initialize();
+
     // Reset search criteria
-    var $search = $('.search-wrapper').clone().removeClass('invisible');
+    var $search = $('.search-wrapper:last').clone().removeClass('invisible');
     // Initialise typeahead
     $search.find('#ingredient-search').typeahead(null, {
       name: 'ingredientsList',
@@ -628,6 +627,7 @@ $(document).on('ready', function() {
 
     $('.main').empty()
               .append($search);
+
 
     myCabinet.clearSearchItems();
     $('.search-criteria').empty();
