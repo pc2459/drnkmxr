@@ -235,6 +235,7 @@ var DrnkMxr = (function(){
     Cabinet.prototype.autoFBLoad = function(){
       var cabinet = this;
       drinksFB.on("child_added", function(snapshot){
+        console.log("Adding a drink to the cabinet...");
         return cabinet.addDrink(snapshot.val().name, 
                                 snapshot.val().base, 
                                 snapshot.val().ingredients, 
@@ -657,11 +658,6 @@ $(document).on('ready', function() {
   ///////////
   
   $('body').on('click','.log-in',function(){
-
-    var checkIfUserExists = function(userID){
-
-    }
-      
       
     // Twitter login
     usersFB.authWithOAuthPopup("twitter", function(error, authData) {
@@ -680,8 +676,6 @@ $(document).on('ready', function() {
       }
     });
 
-
-
     //Set user up in database
     usersFB.onAuth(function(authData){
 
@@ -695,24 +689,18 @@ $(document).on('ready', function() {
             // Store on FB
             usersFB.child(authData.uid).set({
               name : authData.twitter.displayName,
-              // addedDrinks : [],
-              // voted : [],
-              // favourites : []
             });
-
 
             // Store locally for use
             myUser = new DrnkMxr.User(authData.uid, authData.twitter.displayName);
           }
           // If they do...
           else{
-            // Load 'em up
+            // Load 'em up AND KEEP THEM LOADED UP
             console.log("Loading up old user");
 
             var usersVoted = [];
-            usersFB.child(user.key()).child("voted").on("child_added", function(drink){
-              
-              console.log(drink.val().id);
+            usersFB.child(user.key()).child("voted").on("child_added", function(drink){              
               usersVoted.push(drink.val().id);
               myUser.voted = usersVoted;
             });
@@ -720,18 +708,11 @@ $(document).on('ready', function() {
             myUser.id = user.key();
             myUser.name = user.val().name;
             console.log(myUser);
-                                      // user.val().addedDrinks,
-                                      // usersVoted,
-                                      // user.val().favourites);
           }
         });        
       }      
 
     });
-
-
-
-
 
   })
 

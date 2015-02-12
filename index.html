@@ -25,8 +25,14 @@
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="navbar-collapse-5">
             <ul class="nav navbar-nav">
-              <li><a href="#" id="by-base" class="by-base">By Base</a></li>
-              <li><a href="#" id="by-ingre" class="by-ingre">By Ingredients</a></li>
+              <li class="dropdown" role="presentation">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Mix By <b class="caret"></b></a>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a href="#" id="by-base" class="by-base">By Base</a></li>
+                  <li><a href="#" id="by-ingre" class="by-ingre">By Ingredients</a></li>
+                </ul>
+              </li>
+
               <li><a href="#" id="top-drinks" class="top-drinks">Top Drinks</a></li>
               <li><a href="#" id="add-drink" class="add-drink">Add Drink</a></li>
               <li><a href="#" id="log-in" class="log-in pull-right">Log in</a></li>
