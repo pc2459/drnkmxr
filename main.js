@@ -411,12 +411,14 @@ $(document).on('ready', function() {
 
       //Add the drink to the user's voted array
       myUser.storeVote(drinkID);
-      usersFB.child(myUser.id).update({ "voted" : this.voted });
+      usersFB.child(authData.uid).child("voted").push({ id : drinkID });
+      // usersFB.child(myUser.id).update({ voted : this.voted });
 
       if (delta === 1){
         // Add to user's favourites
         myUser.storeUpvote(drinkID);
-        usersFB.child(myUser.id).update({ "favourited" : this.favourites });
+        usersFB.child(authData.uid).child("favourited").push({ id : drinkID });
+        // usersFB.child(myUser.id).update({ "favourited" : this.favourites });
       }
       
       //Rate the drink
@@ -693,8 +695,12 @@ $(document).on('ready', function() {
             console.log("Loading up new user");
             // Store on FB
             usersFB.child(authData.uid).set({
-              name : authData.twitter.displayName
-            })
+              name : authData.twitter.displayName,
+              // addedDrinks : [],
+              // voted : [],
+              // favourites : []
+            });
+
 
             // Store locally for use
             myUser = new DrnkMxr.User(authData.uid, authData.twitter.displayName);
@@ -703,10 +709,18 @@ $(document).on('ready', function() {
           else{
             // Load 'em up
             console.log("Loading up old user");
+
+            var usersVoted = [];
+            usersFB.child(user.key()).child("voted").once("value", function(drink){
+              console.log(drink.val().id);
+              usersVoted.push(drink.val().id);
+            });
+            console.log(usersVoted);
+
             myUser = new DrnkMxr.User(user.key(),
                                       user.val().name,
                                       user.val().addedDrinks,
-                                      user.val().voted,
+                                      usersVoted,
                                       user.val().favourites);
           }
         });        
