@@ -20,7 +20,9 @@ html {
   
 }
 
-.jumbotron{
+
+.jumbotron {
+
   background-color: transparent;
 }
 
@@ -38,6 +40,7 @@ html {
   background: #C0392B;
   color: #ECF0F1;
   margin: 0 auto;
+  opacity: 0.9;
 }
 
 .btn-circle-small {

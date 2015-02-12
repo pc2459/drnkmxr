@@ -540,7 +540,7 @@ $(document).on('ready', function() {
               .append(myCabinet.basesView());
 
     // Adjust navigation link
-    $('#by-base').parent().addClass('active').siblings().removeClass('active');
+    $(this).parent().parent().parent().siblings().removeClass('active');
   });
 
   /**
@@ -610,7 +610,7 @@ $(document).on('ready', function() {
     $('.common-tags-wrapper').empty().append(myCabinet.createCommonTags(5));
 
     // Adjust navigation link
-    $('#by-ingre').parent().addClass('active').siblings().removeClass('active');
+    $(this).parent().parent().parent().siblings().removeClass('active');
 
   });
 
@@ -627,7 +627,6 @@ $(document).on('ready', function() {
     }
     else{
       myCabinet.addSearchItem(ingre);
-      console.log("Search criteria:", myCabinet.searchCriteria);
       var ingreEl = $('<span>')
                     .addClass('ingre')
                     .addClass('tag')
@@ -695,7 +694,6 @@ $(document).on('ready', function() {
 
   // Get top drinks
   $('body').on('click','.top-drinks',function(){
-    console.log("Clicked on top drinks");
 
     myCabinet.drinks = myCabinet.sortBy("votes");
     
@@ -704,7 +702,7 @@ $(document).on('ready', function() {
               .append(myCabinet.createRemainder());
 
     // Adjust navigation link
-    $('#top-drinks').parent().addClass('active').siblings().removeClass('active');
+    $(this).parent().addClass('active').siblings().removeClass('active');
   });
 
   /////////////////
@@ -745,7 +743,7 @@ $(document).on('ready', function() {
               .append($form);
 
     // Adjust navigation link
-    $('#add-drink').parent().addClass('active').siblings().removeClass('active');
+    $(this).parent().addClass('active').siblings().removeClass('active');
   });
 
 
@@ -756,7 +754,6 @@ $(document).on('ready', function() {
 
     // Add to placeholder drink ingredients list
     newDrinkIngredients.push(ingre);
-    console.log("Mydrink's ingredients:", newDrinkIngredients);
 
     var ingreEl = $('<span>')
                   .addClass('ingre')
@@ -776,12 +773,10 @@ $(document).on('ready', function() {
     var ingreEl = $(this).closest('.tag');
 
     ingreEl.remove();
-    
+
     newDrinkIngredients = _.filter(newDrinkIngredients, function(item){
       return item !== ingre;
     });
-
-    console.log("Mydrink's ingredients:", newDrinkIngredients);
 
 
   });
@@ -882,7 +877,6 @@ $(document).on('ready', function() {
       if(authData) {
         // Check if the user already exists...        
         usersFB.child(authData.uid).once("value",function(user){
-          console.log(user.key());
           // If not...
           if (!user.val()){
             console.log("Loading up new user");
@@ -919,16 +913,14 @@ $(document).on('ready', function() {
       } // end if(authData)      
 
     });
-  })
+  });
 
   ///////////////////
   // PROFILE PAGE  //
   ///////////////////
   
   $('body').on('click','.my-profile',function(){
-    console.log("Clicked on my profile");
     $('.main').empty();
-
 
     // Print upvotes
     $('.main').append('<h3>My Upvotes');
@@ -938,7 +930,7 @@ $(document).on('ready', function() {
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
 
-    // Print upvotes
+    // Print my drink
     $('.main').append('<h3>My Drinks');
 
     usersFB.child(authDataGlobal.uid).child("addedDrinks").on("child_added",function(drink){
@@ -946,8 +938,9 @@ $(document).on('ready', function() {
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
 
+    $(this).parent().parent().parent().siblings().removeClass('active');
 
-  })
+  });
 
   /////////////
   // Log out //
@@ -955,14 +948,13 @@ $(document).on('ready', function() {
   
   $('body').on('click','.logout',function(){
     usersFB.unauth();
+    $(this).parent().parent().parent().siblings().removeClass('active');
     $('.nav-loggedout').removeClass('invisible');
     $('.nav-loggedin').addClass('invisible'); 
     $logoutAlert = $('.logout-alert').removeClass('invisible');
     $('.main').prepend($logoutAlert);
 
-  })
-
-
+  });
 
 
 }); // ./document onready
