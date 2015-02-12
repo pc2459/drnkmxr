@@ -368,6 +368,7 @@ var DrnkMxr = (function(){
 
   User.prototype.storeVote = function(drinkID){
     this.voted.push(drinkID);
+    console.log("storeVote:", this.voted);
   };
 
     return User;
@@ -412,13 +413,11 @@ $(document).on('ready', function() {
       //Add the drink to the user's voted array
       myUser.storeVote(drinkID);
       usersFB.child(authData.uid).child("voted").push({ id : drinkID });
-      // usersFB.child(myUser.id).update({ voted : this.voted });
 
       if (delta === 1){
         // Add to user's favourites
         myUser.storeUpvote(drinkID);
         usersFB.child(authData.uid).child("favourited").push({ id : drinkID });
-        // usersFB.child(myUser.id).update({ "favourited" : this.favourites });
       }
       
       //Rate the drink
@@ -711,17 +710,19 @@ $(document).on('ready', function() {
             console.log("Loading up old user");
 
             var usersVoted = [];
-            usersFB.child(user.key()).child("voted").once("value", function(drink){
+            usersFB.child(user.key()).child("voted").on("child_added", function(drink){
+              
               console.log(drink.val().id);
               usersVoted.push(drink.val().id);
+              myUser.voted = usersVoted;
             });
-            console.log(usersVoted);
 
-            myUser = new DrnkMxr.User(user.key(),
-                                      user.val().name,
-                                      user.val().addedDrinks,
-                                      usersVoted,
-                                      user.val().favourites);
+            myUser.id = user.key();
+            myUser.name = user.val().name;
+            console.log(myUser);
+                                      // user.val().addedDrinks,
+                                      // usersVoted,
+                                      // user.val().favourites);
           }
         });        
       }      
