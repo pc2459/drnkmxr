@@ -745,29 +745,59 @@ $(document).on('ready', function() {
   // Submit the form 
   $('body').on('click','.btn-submit',function(e){
     e.preventDefault();
+    console.log(newDrinkIngredients);
 
     var form = $(this).closest('.form-horizontal');
-    console.log(form);
-
     var name = form.find('#name').val();
-
     var base = form.find('#base-add').val();
-
     var instructions = form.find('#instructions').val();
 
-    drinksFB.push({ name : name, 
-                    base : base,
-                    ingredients : newDrinkIngredients,
-                    instructions : instructions,
-                    votes : 0}, function(error){
-                      if(error){
-                        console.log("Something went wrong");
-                      }
-                        else {
-                          console.log("Successfully added drink");
-                        }
-                      }
-                    );
+    // Basic form validation in case of empty fields
+    if (!name || !base || newDrinkIngredients.length === 0 || !instructions){
+      if (!name){
+        form.find('#name').closest('.form-group').addClass('has-error');
+      }
+      if (!base){
+        form.find('#base-add').closest('.form-group').addClass('has-error');
+      }
+
+      if (newDrinkIngredients.length === 0){
+        form.find('#ingredient-add').closest('.form-group').addClass('has-error');
+      }
+      if (!base){
+        form.find('#instructions').closest('.form-group').addClass('has-error');
+      }
+
+      // Flash a warning button
+      $(this).addClass('btn-danger').delay(400).queue(function(){
+        $(this).removeClass('btn-danger');
+
+      });
+    }
+    // Else push the drink to the database
+    else{
+      drinksFB.push({ name : name, 
+                      base : base,
+                      ingredients : newDrinkIngredients,
+                      instructions : instructions,
+                      votes : 0}, 
+        function(error){
+          if(error){
+            console.log("Something went wrong");
+          }
+          else {
+            console.log("Successfully added drink");
+          }
+        }
+      );
+
+      // Flash success
+      $(this).addClass('btn-success').delay(400).queue(function(){
+        $(this).removeClass('btn-success');
+        
+      });
+
+    }
 
   });
 
