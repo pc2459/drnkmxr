@@ -258,7 +258,7 @@ var DrnkMxr = (function(){
       var cabinet = this;
       // Add to the cabinet, and keep watching for new additions
       drinksFB.on("child_added", function(snapshot){
-        console.log("Adding a drink to the cabinet...");
+        // console.log("Adding a drink to the cabinet...");
         return cabinet.addDrink(snapshot.val().name, 
                                 snapshot.val().base, 
                                 snapshot.val().ingredients, 
@@ -418,20 +418,26 @@ var DrnkMxr = (function(){
 // DOCUMENT ON READY                                    //
 //////////////////////////////////////////////////////////
 
+// Initialise the drinking!!!
 var myCabinet = new DrnkMxr.Cabinet();
-myCabinet.autoFBLoad();
 var myUser = new DrnkMxr.User(0,"Anonymous");
 var newDrinkIngredients = [];
+myCabinet.autoFBLoad();
 
 
 $(document).on('ready', function() {
 
-
+  // Check to see if user already has a session
   var authDataGlobal = usersFB.getAuth();
 
-  var loadUpUser = function(authData){
-    console.log(authData);
-    usersFB.child(authData.uid).once("value",function(user){
+
+  // If user already has a session, load them up
+  if(authDataGlobal){
+    // Get them the right user navigation
+    $('.nav-loggedout').addClass('invisible');
+    $('.nav-loggedin').removeClass('invisible');
+
+    usersFB.child(authDataGlobal.uid).once("value",function(user){
       // Push all old votes to the user, and keep watching for new votes
       usersFB.child(user.key()).child("voted").on("child_added", function(drink){   
         myUser.voted.push(drink.val().id);
@@ -447,29 +453,16 @@ $(document).on('ready', function() {
       myUser.name = user.val().name;
       console.log(myUser);
     })
-
-  };
-
-
-  if(authDataGlobal){
-    // Get them the right user navigation
-    $('.nav-loggedout').addClass('invisible');
-    $('.nav-loggedin').removeClass('invisible');
-    console.log("??????");
-
-    loadUpUser(authDataGlobal);
-
   }
-
-
-
-
 
 
   ///////////////////
   // RATING SYSTEM //
   ///////////////////
-  
+
+  /**
+   * Helper function for rating drinks and updating the database
+   */  
   var rateDrink = function(delta, thatEl){
 
     var drinkID = thatEl.closest('.drink').attr('id');
@@ -503,6 +496,9 @@ $(document).on('ready', function() {
     }
   };
   
+  /**
+   * Up and downvote functions
+   */  
   $('body').on('click','.up', function(){
     rateDrink(1, $(this));
   });
@@ -569,8 +565,12 @@ $(document).on('ready', function() {
 
   var $alert = $('.alert').clone().removeClass('invisible');
 
+  /**
+   * Helper function to initiate Bloodhounds
+   * @param  {array} array          Suggestion list for the Bloodhound
+   * @return {Bloodhound object}    Bloodhoud initialised list
+   */
   var initBloodhound = function(array){
-
     var vocabList = new Bloodhound({
       datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
       queryTokenizer: Bloodhound.tokenizers.whitespace,
@@ -578,7 +578,6 @@ $(document).on('ready', function() {
       local: _.map(array, function(arrayItem) { return {word : arrayItem}; })
      });  
     vocabList.initialize();
-
     return vocabList;
   }
 
@@ -674,7 +673,9 @@ $(document).on('ready', function() {
   });
 
 
-  // Remove ingredient criteria
+  /**
+   * Remove ingredient criteria search
+   */
   $('body').on('click','.remove-searchitem',function(){
     var ingre = $(this).closest('.ingre').text();
     var ingreEl = $(this).closest('.tag');
@@ -692,7 +693,9 @@ $(document).on('ready', function() {
   // TOP DRINKS //
   ////////////////
 
-  // Get top drinks
+  /**
+   * Get top drinks
+   */
   $('body').on('click','.top-drinks',function(){
 
     myCabinet.drinks = myCabinet.sortBy("votes");
@@ -709,6 +712,9 @@ $(document).on('ready', function() {
   // ADD A DRINK //
   /////////////////
   
+  /**
+   * Generate add a drink form page
+   */  
   $('body').on('click','.add-drink',function(){
     //reset the ingredients placeholders
     newDrinkIngredients = [];
@@ -747,7 +753,9 @@ $(document).on('ready', function() {
   });
 
 
-  // Add an ingredient to the new drink
+  /**
+   * Add a new ingredient to the new drink
+   */ 
   $('body').on('click','.btn-add-ingre', function(e){
     e.preventDefault();
     var ingre = $('#ingredient-add').val();
@@ -765,9 +773,9 @@ $(document).on('ready', function() {
 
   });
 
-
-  // Remove an ingredient from the new drink
-
+  /**
+   * Remove an ingredient from the new drink
+   */ 
   $('body').on('click','.remove-newingre',function(){
     var ingre = $(this).closest('.ingre').text();
     var ingreEl = $(this).closest('.tag');
@@ -777,14 +785,13 @@ $(document).on('ready', function() {
     newDrinkIngredients = _.filter(newDrinkIngredients, function(item){
       return item !== ingre;
     });
-
-
   });
 
-  // Submit the form 
+  /**
+   * Submit the new drink
+   */ 
   $('body').on('click','.btn-submit',function(e){
     e.preventDefault();
-    console.log(newDrinkIngredients);
 
     var form = $(this).closest('.form-horizontal');
     var name = form.find('#name').val();
@@ -838,11 +845,9 @@ $(document).on('ready', function() {
       });
 
       // Reset form 
-      
       form[0].reset(); 
       
     }
-
   });
 
 
@@ -850,9 +855,11 @@ $(document).on('ready', function() {
   ///////////
   // LOGIN //
   ///////////
-  
-  $('body').on('click','.log-in',function(){
-      
+ 
+  /**
+   * Twitter login and user authentication 
+   */   
+  $('body').on('click','.log-in',function(){  
     // Twitter login
     usersFB.authWithOAuthPopup("twitter", function(error, authData) {
       if (error) {
@@ -919,6 +926,9 @@ $(document).on('ready', function() {
   // PROFILE PAGE  //
   ///////////////////
   
+  /**
+   * Generate profile page with upvoted drinks and user's submitted drinks 
+   */   
   $('body').on('click','.my-profile',function(){
     $('.main').empty();
 
@@ -926,7 +936,6 @@ $(document).on('ready', function() {
     $('.main').append('<h3>My Upvotes');
 
     usersFB.child(authDataGlobal.uid).child("favourited").on("child_added",function(drink){
-      console.log(drink.val().id);
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
 
@@ -934,7 +943,6 @@ $(document).on('ready', function() {
     $('.main').append('<h3>My Drinks');
 
     usersFB.child(authDataGlobal.uid).child("addedDrinks").on("child_added",function(drink){
-      console.log(drink.val().id);
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
 
@@ -945,7 +953,10 @@ $(document).on('ready', function() {
   /////////////
   // Log out //
   /////////////
-  
+
+  /**
+   * Log the user out
+   */    
   $('body').on('click','.logout',function(){
     usersFB.unauth();
     $(this).parent().parent().parent().siblings().removeClass('active');
