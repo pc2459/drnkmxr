@@ -245,6 +245,7 @@ var DrnkMxr = (function(){
 
     Cabinet.prototype.autoFBLoad = function(){
       var cabinet = this;
+      // Add to the cabinet, and keep watching for new additions
       drinksFB.on("child_added", function(snapshot){
         console.log("Adding a drink to the cabinet...");
         return cabinet.addDrink(snapshot.val().name, 
@@ -367,22 +368,23 @@ var DrnkMxr = (function(){
   ////////////////
 
   var User = (function(){
-    var User = function(id, name, addedDrinks, voted, favourites){
+    var User = function(id, name, addedDrinks, voted, favourited){
       this.id = id;
       this.name = name;
       this.addedDrinks = addedDrinks || [];
       this.voted = voted || [];
-      this.favourites = favourites || [];
+      this.favourited = favourited || [];
     };
 
-  User.prototype.storeUpvote = function(drinkID){
-    this.favourites.push(drinkID);
-  };
+  // User.prototype.storeUpvote = function(drinkID){
+  //   this.favourited.push(drinkID);
+  //   console.log("storeUpvote fired, myUser is now:", this.favourited);
+  // };
 
-  User.prototype.storeVote = function(drinkID){
-    this.voted.push(drinkID);
-    console.log("storeVote:", this.voted);
-  };
+  // User.prototype.storeVote = function(drinkID){
+  //   this.voted.push(drinkID);
+  //   console.log("storeVote:", this.voted);
+  // };
 
     return User;
   })();
@@ -403,6 +405,7 @@ var DrnkMxr = (function(){
 var myCabinet = new DrnkMxr.Cabinet();
 myCabinet.autoFBLoad();
 var myUser = new DrnkMxr.User(0,"Anonymous");
+var newDrinkIngredients = [];
 
 $(document).on('ready', function() {
 
@@ -423,13 +426,11 @@ $(document).on('ready', function() {
         return drink.id === drinkID;
       });
 
-      //Add the drink to the user's voted array
-      myUser.storeVote(drinkID);
+      //Add the drink to the user's voted array - no need to store locally twice since the async call handles it below
       usersFB.child(authData.uid).child("voted").push({ id : drinkID });
 
       if (delta === 1){
-        // Add to user's favourites
-        myUser.storeUpvote(drinkID);
+        // Add to user's favourites - no need to store locally twice since the async call handles it down below
         usersFB.child(authData.uid).child("favourited").push({ id : drinkID });
       }
       
@@ -445,9 +446,6 @@ $(document).on('ready', function() {
     else {
       $('.main').prepend('<div class="alert alert-warning alert-dismissible" role="alert">Sorry! You need to be logged in to vote! <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
     }
-
-    console.log("Voted:",myUser.voted);
-    console.log("Liked:",myUser.favourites);
   };
   
   $('body').on('click','.up', function(){
@@ -483,7 +481,6 @@ $(document).on('ready', function() {
    */
   $('body').on('click','.by-base', function(){
 
-    
     $('.main').empty()
               .append(myCabinet.basesView());
 
@@ -517,19 +514,25 @@ $(document).on('ready', function() {
 
   var $alert = $('.alert').clone().removeClass('invisible');
 
+  var initBloodhound = function(array){
+
+    var vocabList = new Bloodhound({
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      limit: 4,
+      local: _.map(array, function(arrayItem) { return {word : arrayItem}; })
+     });  
+    vocabList.initialize();
+
+    return vocabList;
+  }
+
   /**
    * Build mix by ingredient "view"
    */
   $('body').on('click','.by-ingre',function(){
 
-    // Initialise Bloodhound for typeahead
-    var ingredientsList = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      limit: 4,
-      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
-     });  
-    ingredientsList.initialize();
+    var ingredientsList = initBloodhound(myCabinet.getIngredients());
 
     // Reset search criteria
     var $search = $('.search-wrapper:last').clone().removeClass('invisible');
@@ -623,7 +626,6 @@ $(document).on('ready', function() {
     var ingreEl = $(this).closest('.tag');
 
     ingreEl.remove();
-
     myCabinet.removeSearchItem(ingre);
     
     $('.results').empty()
@@ -657,32 +659,21 @@ $(document).on('ready', function() {
   $('body').on('click','.add-drink',function(){
     //reset the ingredients placeholders
     newDrinkIngredients = [];
-    $('#ingredients').empty();
+    $('.ingredients').empty();
 
     var allBases = _.pluck(myCabinet.drinks, "base");
     var uniqueBases = _.uniq(allBases);
 
     // Initialise Bloodhound for ingredients typeahead
-    var ingredientsList = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      limit: 4,
-      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
-     });  
-    ingredientsList.initialize();
+    var ingredientsList = initBloodhound(myCabinet.getIngredients());
 
     // Initialise Bloodhound for bases typeahead
-    var basesList = new Bloodhound({
-      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
-      queryTokenizer: Bloodhound.tokenizers.whitespace,
-      limit: 4,
-      local: _.map(uniqueBases, function(base) { return {word : base}; })
-     });  
-    basesList.initialize();
+    var basesList = initBloodhound(uniqueBases);
 
     // Reset form
     var $form = $('.drink-add-wrapper:last').clone().removeClass('invisible');
-    // Initialise typeahead
+
+    // Initialise typeaheads
     $form.find('#ingredient-add').typeahead(null, {
       name: 'ingredientsList',
       displayKey: 'word',
@@ -703,7 +694,7 @@ $(document).on('ready', function() {
   });
 
   
-  var newDrinkIngredients = [];
+  
 
   // Add an ingredient to the new drink
   $('body').on('click','.btn-add-ingre', function(e){
@@ -774,7 +765,8 @@ $(document).on('ready', function() {
 
       });
     }
-    // Else push the drink to the database
+    // Else push the drink to the FB database
+    // The autoFBload called before will automatically handle adding the drink to the local cabinet
     else{
       drinksFB.push({ name : name, 
                       base : base,
@@ -794,9 +786,7 @@ $(document).on('ready', function() {
       // Flash success
       $(this).addClass('btn-success').delay(400).queue(function(){
         $(this).removeClass('btn-success');
-        
       });
-
     }
 
   });
@@ -847,18 +837,21 @@ $(document).on('ready', function() {
           }
           // If they do...
           else{
-            // Load 'em up AND KEEP THEM LOADED UP
+            // Load 'em up AND KEEP WATCHING THEM
             console.log("Loading up old user");
 
-            var usersVoted = [];
-            usersFB.child(user.key()).child("voted").on("child_added", function(drink){              
-              usersVoted.push(drink.val().id);
-              myUser.voted = usersVoted;
+            // Push all old votes to the user, and keep watching for new votes
+            usersFB.child(user.key()).child("voted").on("child_added", function(drink){   
+              myUser.voted.push(drink.val().id);
+            });
+
+            // Push all old upvotes to the user, and keep watching for new votes
+            usersFB.child(user.key()).child("favourited").on("child_added", function(drink){   
+              myUser.favourited.push(drink.val().id);
             });
 
             myUser.id = user.key();
             myUser.name = user.val().name;
-            console.log(myUser);
           }
         });        
       }      
