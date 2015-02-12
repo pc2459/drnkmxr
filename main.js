@@ -427,7 +427,7 @@ var newDrinkIngredients = [];
 $(document).on('ready', function() {
 
 
-  var authData = usersFB.getAuth();
+  var authDataGlobal = usersFB.getAuth();
 
   var loadUpUser = function(authData){
     console.log(authData);
@@ -451,13 +451,13 @@ $(document).on('ready', function() {
   };
 
 
-  if(authData){
+  if(authDataGlobal){
     // Get them the right user navigation
     $('.nav-loggedout').addClass('invisible');
     $('.nav-loggedin').removeClass('invisible');
     console.log("??????");
 
-    loadUpUser(authData);
+    loadUpUser(authDataGlobal);
 
   }
 
@@ -474,7 +474,7 @@ $(document).on('ready', function() {
 
     var drinkID = thatEl.closest('.drink').attr('id');
     // Check to see if user is logged in
-    if(authData && !_.contains(myUser.voted, drinkID)){
+    if(authDataGlobal && !_.contains(myUser.voted, drinkID)){
       
       var votesEl = thatEl.siblings('.votes');
       var drink = _.find(myCabinet.drinks, function(drink){
@@ -482,11 +482,11 @@ $(document).on('ready', function() {
       });
 
       //Add the drink to the user's voted array - no need to store locally twice since the async call handles it below
-      usersFB.child(authData.uid).child("voted").push({ id : drinkID });
+      usersFB.child(authDataGlobal.uid).child("voted").push({ id : drinkID });
 
       if (delta === 1){
         // Add to user's favourites - no need to store locally twice since the async call handles it down below
-        usersFB.child(authData.uid).child("favourited").push({ id : drinkID });
+        usersFB.child(authDataGlobal.uid).child("favourited").push({ id : drinkID });
       }
       
       //Rate the drink
@@ -495,7 +495,7 @@ $(document).on('ready', function() {
       //Update the DOM element
       votesEl.html(drink.votes);
     }
-    else if (authData && _.contains(myUser.voted, drinkID)){
+    else if (authDataGlobal && _.contains(myUser.voted, drinkID)){
       $('.main').prepend('<div class="alert alert-warning alert-dismissible" role="alert">Stop stuffing ballots! <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
     }
     else {
@@ -834,7 +834,7 @@ $(document).on('ready', function() {
       );
 
       // Also add it to the user's records
-      usersFB.child(authData.uid).child("addedDrinks").push({ id : newDrink.key() });
+      usersFB.child(authDataGlobal.uid).child("addedDrinks").push({ id : newDrink.key() });
 
       // Flash success
       $(this).addClass('btn-success').delay(400).queue(function(){
@@ -871,6 +871,7 @@ $(document).on('ready', function() {
 
     //Set user up in database
     usersFB.onAuth(function(authData){
+      authDataGlobal = authData;
 
       if(authData) {
         // Check if the user already exists...        
@@ -926,7 +927,7 @@ $(document).on('ready', function() {
     // Print upvotes
     $('.main').append('<h3>My Upvotes');
 
-    usersFB.child(authData.uid).child("favourited").on("child_added",function(drink){
+    usersFB.child(authDataGlobal.uid).child("favourited").on("child_added",function(drink){
       console.log(drink.val().id);
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
@@ -934,14 +935,28 @@ $(document).on('ready', function() {
     // Print upvotes
     $('.main').append('<h3>My Drinks');
 
-    usersFB.child(authData.uid).child("addedDrinks").on("child_added",function(drink){
+    usersFB.child(authDataGlobal.uid).child("addedDrinks").on("child_added",function(drink){
       console.log(drink.val().id);
       $('.main').append(myCabinet.createByID(drink.val().id));
     })
 
 
   })
+
+  /////////////
+  // Log out //
+  /////////////
   
+  $('body').on('click','.logout',function(){
+    usersFB.unauth();
+    $('.nav-loggedout').removeClass('invisible');
+    $('.nav-loggedin').addClass('invisible'); 
+    $logoutAlert = $('.logout-alert').removeClass('invisible');
+    $('.main').prepend($logoutAlert);
+
+  })
+
+
 
 
 }); // ./document onready
