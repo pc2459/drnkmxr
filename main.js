@@ -822,6 +822,7 @@ $(document).on('ready', function() {
     // Else push the drink to the FB database
     // The autoFBload called before will automatically handle adding the drink to the local cabinet
     else{
+      newDrinkIngredients.unshift(base);
       newDrink = drinksFB.push({ name : name, 
                       base : base,
                       ingredients : newDrinkIngredients,
@@ -840,6 +841,11 @@ $(document).on('ready', function() {
       $(this).addClass('btn-success').delay(400).queue(function(){
         $(this).removeClass('btn-success');
       });
+
+      // Reset form 
+      
+      form[0].reset(); 
+      
     }
 
   });
