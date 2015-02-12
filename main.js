@@ -213,6 +213,17 @@ var DrnkMxr = (function(){
       return missedDrinks;
     };
 
+
+    Cabinet.prototype.createByID= function(drinkID){
+
+      // Find the drink that matches the ID
+      var drink = _.find(this.drinks, function(drink){
+
+        return drink.id === drinkID;
+      });
+      return drink.createCollapsed();
+    };
+
     /**
      * Sort a cabinet based on a property and direction
      * @param  {string} property      name, base, votes
@@ -402,20 +413,64 @@ var DrnkMxr = (function(){
   return DrnkMxr;
 })();
 
+
+//////////////////////////////////////////////////////////
+// DOCUMENT ON READY                                    //
+//////////////////////////////////////////////////////////
+
 var myCabinet = new DrnkMxr.Cabinet();
 myCabinet.autoFBLoad();
 var myUser = new DrnkMxr.User(0,"Anonymous");
 var newDrinkIngredients = [];
 
+
 $(document).on('ready', function() {
+
+
+  var authData = usersFB.getAuth();
+
+  var loadUpUser = function(authData){
+    console.log(authData);
+    usersFB.child(authData.uid).once("value",function(user){
+      // Push all old votes to the user, and keep watching for new votes
+      usersFB.child(user.key()).child("voted").on("child_added", function(drink){   
+        myUser.voted.push(drink.val().id);
+
+      });
+
+      // Push all old upvotes to the user, and keep watching for new votes
+      usersFB.child(user.key()).child("favourited").on("child_added", function(drink){   
+        myUser.favourited.push(drink.val().id);
+      });
+
+      myUser.id = user.key();
+      myUser.name = user.val().name;
+      console.log(myUser);
+    })
+
+  };
+
+
+  if(authData){
+    // Get them the right user navigation
+    $('.nav-loggedout').addClass('invisible');
+    $('.nav-loggedin').removeClass('invisible');
+    console.log("??????");
+
+    loadUpUser(authData);
+
+  }
+
+
+
+
+
 
   ///////////////////
   // RATING SYSTEM //
   ///////////////////
   
   var rateDrink = function(delta, thatEl){
-    var authData = usersFB.getAuth();
-    console.log(authData);
 
     var drinkID = thatEl.closest('.drink').attr('id');
     // Check to see if user is logged in
@@ -693,8 +748,6 @@ $(document).on('ready', function() {
     $('#add-drink').parent().addClass('active').siblings().removeClass('active');
   });
 
-  
-  
 
   // Add an ingredient to the new drink
   $('body').on('click','.btn-add-ingre', function(e){
@@ -742,6 +795,7 @@ $(document).on('ready', function() {
     var name = form.find('#name').val();
     var base = form.find('#base-add').val();
     var instructions = form.find('#instructions').val();
+    var newDrink = "";
 
     // Basic form validation in case of empty fields
     if (!name || !base || newDrinkIngredients.length === 0 || !instructions){
@@ -768,20 +822,19 @@ $(document).on('ready', function() {
     // Else push the drink to the FB database
     // The autoFBload called before will automatically handle adding the drink to the local cabinet
     else{
-      drinksFB.push({ name : name, 
+      newDrink = drinksFB.push({ name : name, 
                       base : base,
                       ingredients : newDrinkIngredients,
                       instructions : instructions,
                       votes : 0}, 
         function(error){
-          if(error){
-            console.log("Something went wrong");
-          }
-          else {
-            console.log("Successfully added drink");
-          }
+          if(error){ console.log("Something went wrong"); }
+          else {   console.log("Successfully added drink"); }
         }
       );
+
+      // Also add it to the user's records
+      usersFB.child(authData.uid).child("addedDrinks").push({ id : newDrink.key() });
 
       // Flash success
       $(this).addClass('btn-success').delay(400).queue(function(){
@@ -790,7 +843,6 @@ $(document).on('ready', function() {
     }
 
   });
-
 
 
 
@@ -838,6 +890,9 @@ $(document).on('ready', function() {
           // If they do...
           else{
             // Load 'em up AND KEEP WATCHING THEM
+            $('.nav-loggedout').addClass('invisible');
+            $('.nav-loggedin').removeClass('invisible'); 
+            
             console.log("Loading up old user");
 
             // Push all old votes to the user, and keep watching for new votes
@@ -854,13 +909,39 @@ $(document).on('ready', function() {
             myUser.name = user.val().name;
           }
         });        
-      }      
+      } // end if(authData)      
 
     });
-
   })
 
-
+  ///////////////////
+  // PROFILE PAGE  //
+  ///////////////////
   
+  $('body').on('click','.my-profile',function(){
+    console.log("Clicked on my profile");
+    $('.main').empty();
+
+
+    // Print upvotes
+    $('.main').append('<h3>My Upvotes');
+
+    usersFB.child(authData.uid).child("favourited").on("child_added",function(drink){
+      console.log(drink.val().id);
+      $('.main').append(myCabinet.createByID(drink.val().id));
+    })
+
+    // Print upvotes
+    $('.main').append('<h3>My Drinks');
+
+    usersFB.child(authData.uid).child("addedDrinks").on("child_added",function(drink){
+      console.log(drink.val().id);
+      $('.main').append(myCabinet.createByID(drink.val().id));
+    })
+
+
+  })
+  
+
 
 }); // ./document onready
