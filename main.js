@@ -21,8 +21,8 @@ var DrnkMxr = (function(){
       
       this.name = name;
       this.base = base;
-      this.ingredients = ingredients;
-      this.instructions = instructions;
+      this.ingredients = ingredients || [];
+      this.instructions = instructions || "";
       this.votes = votes || 0;
       this.id = id;
       
@@ -40,6 +40,17 @@ var DrnkMxr = (function(){
 
       return this.$drinkEl;
     };
+
+    /**
+     * Remove an ingredient from the search criteria
+     * @param  {string} item        Ingredient to be removed
+     */
+    Drink.prototype.removeIngredient = function(item){
+      this.ingredients = _.filter(this.ingredients, function(ingre){
+        return ingre !== item;
+      })
+    };
+
 
     /**
      * Create an accordioned drink DOM element
@@ -266,6 +277,7 @@ var DrnkMxr = (function(){
       return $(template(context));
     };
 
+
     /**
      * Render a cabinet filtered according to a given base
      * @param  {string} base          Base alcohol to filter by
@@ -436,15 +448,10 @@ $(document).on('ready', function() {
 
     console.log("Voted:",myUser.voted);
     console.log("Liked:",myUser.favourites);
-
   };
-  
   
   $('body').on('click','.up', function(){
     rateDrink(1, $(this));
-
-    
-
   });
 
   $('body').on('click','.down', function(){
@@ -566,7 +573,7 @@ $(document).on('ready', function() {
       var ingreEl = $('<span>')
                     .addClass('ingre')
                     .addClass('tag')
-                    .append(ingre + '<span class="remove">');
+                    .append(ingre + '<span class="remove remove-searchitem">');
 
       $('.search-criteria').append(ingreEl);
       $('#ingredient-search').val("");
@@ -611,7 +618,7 @@ $(document).on('ready', function() {
 
 
   // Remove ingredient criteria
-  $('body').on('click','.remove',function(){
+  $('body').on('click','.remove-searchitem',function(){
     var ingre = $(this).closest('.ingre').text();
     var ingreEl = $(this).closest('.tag');
 
@@ -648,10 +655,124 @@ $(document).on('ready', function() {
   /////////////////
   
   $('body').on('click','.add-drink',function(){
+    //reset the ingredients placeholders
+    newDrinkIngredients = [];
+    $('#ingredients').empty();
+
+    var allBases = _.pluck(myCabinet.drinks, "base");
+    var uniqueBases = _.uniq(allBases);
+
+    // Initialise Bloodhound for ingredients typeahead
+    var ingredientsList = new Bloodhound({
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      limit: 4,
+      local: _.map(myCabinet.getIngredients(), function(ingredient) { return {word : ingredient}; })
+     });  
+    ingredientsList.initialize();
+
+    // Initialise Bloodhound for bases typeahead
+    var basesList = new Bloodhound({
+      datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.word); },
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      limit: 4,
+      local: _.map(uniqueBases, function(base) { return {word : base}; })
+     });  
+    basesList.initialize();
+
+    // Reset form
+    var $form = $('.drink-add-wrapper:last').clone().removeClass('invisible');
+    // Initialise typeahead
+    $form.find('#ingredient-add').typeahead(null, {
+      name: 'ingredientsList',
+      displayKey: 'word',
+      source: ingredientsList.ttAdapter()
+    });
+
+    $form.find('#base-add').typeahead(null, {
+      name: 'basesList',
+      displayKey: 'word',
+      source: basesList.ttAdapter()
+    });
+
+    $('.main').empty()
+              .append($form);
 
     // Adjust navigation link
     $('#add-drink').parent().addClass('active').siblings().removeClass('active');
   });
+
+  
+  var newDrinkIngredients = [];
+
+  // Add an ingredient to the new drink
+  $('body').on('click','.btn-add-ingre', function(e){
+    e.preventDefault();
+    var ingre = $('#ingredient-add').val();
+
+    // Add to placeholder drink ingredients list
+    newDrinkIngredients.push(ingre);
+    console.log("Mydrink's ingredients:", newDrinkIngredients);
+
+    var ingreEl = $('<span>')
+                  .addClass('ingre')
+                  .addClass('tag')
+                  .append(ingre + '<span class="remove remove-newingre">');
+
+    $('.ingredients').append(ingreEl);
+    $('#ingredient-add').val("");
+
+  });
+
+
+  // Remove an ingredient from the new drink
+
+  $('body').on('click','.remove-newingre',function(){
+    var ingre = $(this).closest('.ingre').text();
+    var ingreEl = $(this).closest('.tag');
+
+    ingreEl.remove();
+    
+    newDrinkIngredients = _.filter(newDrinkIngredients, function(item){
+      return item !== ingre;
+    });
+
+    console.log("Mydrink's ingredients:", newDrinkIngredients);
+
+
+  });
+
+  // Submit the form 
+  $('body').on('click','.btn-submit',function(e){
+    e.preventDefault();
+
+    var form = $(this).closest('.form-horizontal');
+    console.log(form);
+
+    var name = form.find('#name').val();
+
+    var base = form.find('#base-add').val();
+
+    var instructions = form.find('#instructions').val();
+
+    drinksFB.push({ name : name, 
+                    base : base,
+                    ingredients : newDrinkIngredients,
+                    instructions : instructions,
+                    votes : 0}, function(error){
+                      if(error){
+                        console.log("Something went wrong");
+                      }
+                        else {
+                          console.log("Successfully added drink");
+                        }
+                      }
+                    );
+
+  });
+
+
+
 
   ///////////
   // LOGIN //

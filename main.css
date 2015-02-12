@@ -29,7 +29,7 @@ html {
   margin: 40px 0;
 }
 
-.btn-circle{
+.btn-circle {
   display: block;
   width: 200px;
   height: 200px;
@@ -39,6 +39,13 @@ html {
   color: #ECF0F1;
   margin: 0 auto;
 }
+
+.btn-circle-small {
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  line-height: 100px;
+} 
 
 .btn-circle:hover;{
   color: #F1C40F;
@@ -84,6 +91,9 @@ html {
   width: 100%;
 }
 
+.btn-add {
+  width: 100%;
+}
 
 
 .search-criteria-wrapper{
@@ -198,6 +208,12 @@ html {
   padding-left: 20px;
 }
 
+
+/* ADD DRINK */
+
+.form-group {
+  margin: 20px 0;
+}
 
 
 
