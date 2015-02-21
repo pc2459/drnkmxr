@@ -563,7 +563,7 @@ $(document).on('ready', function() {
   ////////////////////
   
 
-  var $alert = $('.alert').clone().removeClass('invisible');
+  var $alert = $('.ingre-alert').clone().removeClass('invisible');
 
   /**
    * Helper function to initiate Bloodhounds
