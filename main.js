@@ -658,7 +658,7 @@ $(document).on('ready', function() {
       var ingreEl = $('<span>')
                     .addClass('ingre')
                     .addClass('tag')
-                    .append(ingre + '<span class="remove">');
+                    .append(ingre + '<span class="remove remove-searchitem">');
 
       $('.search-criteria').append(ingreEl);
 
